@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
 
             public void onPageFinished(WebView view, String url){
 
-                token = Utils.getCookie(URL, "NID");
+                token = CookieUtils.getCookie(URL, "NID");
                 System.out.println("we were looking for this value: " + token);
             }
 

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Created by Jan on 13. 11. 2015.
  */
-public class Utils {
+public class CookieUtils {
 
     /**
      * Function retrieves cookie value from cookie manager.
