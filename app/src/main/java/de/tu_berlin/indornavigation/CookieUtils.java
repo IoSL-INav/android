@@ -12,10 +12,10 @@ public class CookieUtils {
     /**
      * Function retrieves cookie value from cookie manager.
      *
-     * @param domain - cookie domain
+     * @param domain     - cookie domain
      * @param cookieName - name of the cookie
      * @return Function returns String containing cookie value. If cookie with provided name doesn't
-     *         exist, function returns null.
+     * exist, function returns null.
      */
     public static String getCookie(String domain, String cookieName) {
 
@@ -34,5 +34,13 @@ public class CookieUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Function deletes all stored cookies.
+     */
+    public static void deleteCookies() {
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookies(null);
     }
 }
