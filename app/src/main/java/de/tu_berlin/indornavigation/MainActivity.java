@@ -69,11 +69,21 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Starts login (web view) activity
      */
-    public void showLoginScreen(View view) {
+    public void showLoginActivity(View view) {
 
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
+
+    }
+
+    /**
+     * Starts maps activity
+     */
+    public void showMapsActivity(View view) {
+
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
 
     }
 
