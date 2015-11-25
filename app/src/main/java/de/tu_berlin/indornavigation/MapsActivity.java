@@ -12,11 +12,13 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private Marker marker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +44,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
         LatLng berlin = new LatLng(52.512870, 13.326820);
-        mMap.addMarker(new MarkerOptions().position(berlin).title("TU Berlin"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(berlin, 15));
+        LatLng mensaCenter = new LatLng(52.509784, 13.326120);
+
+        marker = mMap.addMarker(new MarkerOptions().position(mensaCenter).title("Mensa"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mensaCenter, 19));
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
             @Override
             public void onMapClick(LatLng latLng) {
-                // TODO Auto-generated method stub
+                marker.setPosition(latLng);
                 System.out.println("Taped LatLng: " + latLng.latitude + ", " + latLng.longitude);
             }
         });
@@ -62,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         GroundOverlayOptions overlayOptions = new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.mensa_eg))
-                .positionFromBounds(bounds);
+                .anchor(1, 1).position(new LatLng(52.509490, 13.326278), 51.88f).bearing(26);
 
         GroundOverlay overlay = mMap.addGroundOverlay(overlayOptions);
 

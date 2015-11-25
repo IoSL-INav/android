@@ -6,3 +6,5 @@
 /build
 /captures
 .idea/codeStyleSettings.xml
+.idea/gradle.xml
+.idea/vcs.xml
