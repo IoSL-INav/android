@@ -85,6 +85,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         System.out.println("Marker position is: " + marker.getPosition());
 
+        /**
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "http://jsonplaceholder.typicode.com/users";
@@ -106,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
         // TODO: destroy queue or make singelton queue
-
+        */
     }
 
 }
