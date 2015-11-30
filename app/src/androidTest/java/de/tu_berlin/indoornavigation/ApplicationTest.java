@@ -1,4 +1,4 @@
-package de.tu_berlin.indornavigation;
+package de.tu_berlin.indoornavigation;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

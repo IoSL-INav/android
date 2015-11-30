@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.tu_berlin.indornavigation" >
+    package="de.tu_berlin.indoornavigation" >
 
     <uses-sdk android:minSdkVersion="21" />
 
@@ -18,13 +18,14 @@
     <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name="de.tu_berlin.indoornavigation.IndoorNavigation"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="de.tu_berlin.indoornavigation.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
@@ -34,7 +35,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="de.tu_berlin.indoornavigation.LoginActivity"
             android:label="@string/title_activity_login"
             android:theme="@style/AppTheme.NoActionBar" />
         <!--
@@ -50,11 +51,11 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="de.tu_berlin.indoornavigation.MapsActivity"
             android:label="@string/title_activity_maps" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="de.tu_berlin.indornavigation.MainActivity" />
+                android:value="de.tu_berlin.indoornavigation.MainActivity" />
         </activity>
     </application>
 

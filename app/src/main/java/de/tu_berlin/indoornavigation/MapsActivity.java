@@ -1,15 +1,9 @@
-package de.tu_berlin.indornavigation;
+package de.tu_berlin.indoornavigation;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -86,28 +80,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         System.out.println("Marker position is: " + marker.getPosition());
 
         /**
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://jsonplaceholder.typicode.com/users";
+         // Instantiate the RequestQueue.
+         RequestQueue queue = Volley.newRequestQueue(this);
+         String url = "http://jsonplaceholder.typicode.com/users";
 
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        System.out.println("Response is: " + response.substring(0, 500));
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println("That didn't work!");
-            }
+         // Request a string response from the provided URL.
+         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+         new Response.Listener<String>() {
+        @Override public void onResponse(String response) {
+        // Display the first 500 characters of the response string.
+        System.out.println("Response is: " + response.substring(0, 500));
+        }
+        }, new Response.ErrorListener() {
+        @Override public void onErrorResponse(VolleyError error) {
+        System.out.println("That didn't work!");
+        }
         });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-        // TODO: destroy queue or make singelton queue
-        */
+         // Add the request to the RequestQueue.
+         queue.add(stringRequest);
+         // TODO: destroy queue or make singelton queue
+         */
     }
 
 }
