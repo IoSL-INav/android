@@ -6,13 +6,21 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+import android.util.Xml;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,45 +30,65 @@ import java.util.concurrent.TimeUnit;
  */
 public class IndoorNavigation extends Application {
 
-    private String apiStatus;
+    private static final String TAG = IndoorNavigation.class.toString();
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        System.out.println("Aplikacija zagnananana"); //TODO: remove
+        Log.d(TAG, "Application started.");
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         scheduler.scheduleAtFixedRate
                 (new Runnable() {
                     public void run() {
-                        System.out.println("Call service: " + apiStatus);
 
-                        String url = "http://jsonplaceholder.typicode.com/users";
+                        Log.d(TAG, "Scheduler run.");
 
-                        // Request a string response from the provided URL.
-                        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                                new Response.Listener<String>() {
-                                    @Override
-                                    public void onResponse(String response) {
-                                        // Display the first 500 characters of the response string.
-                                        apiStatus = response;
-                                        createOnHotspotEnteredNotification(apiStatus);
-                                    }
-                                }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                System.out.print("ERROR");
-                            }
-                        });
+                        WifiManager wifiManager = (WifiManager) getApplicationContext()
+                                .getSystemService(Context.WIFI_SERVICE);
 
-                        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+                        Log.d(TAG, "Current SSID: " + wifiManager.getConnectionInfo().getSSID()
+                                .toString());
+
+                        if (wifiManager.getConnectionInfo().getSSID().equals("\"eduroam\"")) {
+
+                            String url = MsiApiUtils.URL;
+
+                            // Request a string response from the provided URL.
+                            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            String buildingName = parseMsiApiResponse(response);
+                                            if (HotspotUtils.getHotspots().contains(buildingName)) {
+                                                Log.d(TAG, buildingName);
+                                                createOnHotspotEnteredNotification(buildingName);
+                                            } else {
+                                                Log.d(TAG, "Current building is not a hotspot.");
+                                            }
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e(TAG, "Error while making request");
+                                }
+                            });
+
+                            VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+
+                        }
 
                     }
                 }, 0, 1, TimeUnit.MINUTES);
     }
 
+    /**
+     * Creates notification. Not finished jet.
+     *
+     * @param hotspot Name of the hotspot.
+     */
     private void createOnHotspotEnteredNotification(String hotspot) {
 
         NotificationCompat.Builder mBuilder =
@@ -91,6 +119,34 @@ public class IndoorNavigation extends Application {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
         mNotificationManager.notify(123, mBuilder.build());
+
+    }
+
+    /**
+     * Function parses MSI API response and returns building name.
+     *
+     * @param response MSI API response.
+     * @return Building name.
+     */
+    private String parseMsiApiResponse(String response) {
+
+        String buildingName = null;
+
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(new ByteArrayInputStream(response.getBytes()), null);
+            parser.next();
+            if (parser.getAttributeCount() >= 2) {
+                buildingName = parser.getAttributeValue(2);
+            }
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return buildingName;
 
     }
 
