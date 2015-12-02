@@ -2,7 +2,9 @@ package de.tu_berlin.indoornavigation;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,10 +17,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String TAG = MapsActivity.class.toString();
+
+    private TextView currentFloorText;
     private GoogleMap mMap;
     private Marker marker;
+    private ArrayList<GroundOverlay> overlays = new ArrayList<>();
+    private int currentFloor = 0;
+    private int numberOfFloors = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +38,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        currentFloorText = (TextView) findViewById(R.id.current_floor_text);
+        currentFloorText.setText("EG");
     }
 
 
@@ -61,12 +74,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // add map overlay, set anchor in lower righter corner, set position of anchor, set width
         // of overlay in meters, rotate overlay clockwise (in degrees)
-        GroundOverlayOptions overlayOptions = new GroundOverlayOptions()
+        GroundOverlayOptions overlayEGOptions = new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.mensa_eg))
                 .anchor(1, 1).position(new LatLng(52.509490, 13.326278), 51.88f).bearing(26);
 
         // add overlay to map
-        GroundOverlay overlay = mMap.addGroundOverlay(overlayOptions);
+        overlays.add(mMap.addGroundOverlay(overlayEGOptions));
+
+        // add second overlay, first floor
+        GroundOverlayOptions overlay1GOptions = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.mensa_1g))
+                .anchor(1, 1).position(new LatLng(52.509490, 13.326278), 51.88f).bearing(26);
+        overlays.add(mMap.addGroundOverlay(overlay1GOptions));
+        overlays.get(overlays.size() - 1).setVisible(false);
 
     }
 
@@ -77,7 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void sharePosition(View view) {
 
-        System.out.println("Marker position is: " + marker.getPosition());
+        System.out.println("Floor: " + currentFloor + " Marker position is: " + marker.getPosition
+                ());
 
         /**
          // Instantiate the RequestQueue.
@@ -100,6 +121,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          queue.add(stringRequest);
          // TODO: destroy queue or make singelton queue
          */
+    }
+
+    public void changeFloorUp(View view) {
+        Log.d(TAG, "Up.");
+
+        if (currentFloor != numberOfFloors - 1) {
+            currentFloor += 1;
+            selectFloor(currentFloor);
+            setCurrentFloorText(currentFloor);
+        }
+    }
+
+    public void changeFloorDown(View view) {
+        Log.d(TAG, "Down.");
+
+        if (currentFloor > 0) {
+            currentFloor -= 1;
+            selectFloor(currentFloor);
+            setCurrentFloorText(currentFloor);
+        }
+    }
+
+    private void selectFloor(int floor) {
+        for (int i = 0; i < overlays.size(); i++) {
+            if (i == floor) {
+                overlays.get(i).setVisible(true);
+            } else {
+                overlays.get(i).setVisible(false);
+            }
+        }
+    }
+
+    private void setCurrentFloorText(int floor) {
+        if (floor == 0) {
+            currentFloorText.setText("EG");
+        } else {
+            currentFloorText.setText(floor + "G");
+        }
     }
 
 }

@@ -95,7 +95,7 @@ public class IndoorNavigation extends Application {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_cast_on_light)
+                        .setSmallIcon(R.drawable.ic_setting_light)
                         .setContentTitle("Hotspot entered")
                         .setContentText("You have entered hotspot " + hotspot + ". Would you like" +
                                 "to share your location?");
