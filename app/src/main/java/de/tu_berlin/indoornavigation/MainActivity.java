@@ -111,6 +111,6 @@ public class MainActivity extends AppCompatActivity {
     public void exit(View view) {
 
         finish();
-        exit(view);
+        System.exit(0);
     }
 }

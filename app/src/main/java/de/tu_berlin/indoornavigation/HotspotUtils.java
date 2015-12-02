@@ -8,7 +8,7 @@ import java.util.Arrays;
  */
 public class HotspotUtils {
 
-    private static final String[] hotspots = new String[]{"MAR", "TEL"};
+    private static final String[] hotspots = new String[]{"MAR", "Mensa", "TEL"};
 
     public static ArrayList<String> getHotspots() {
         return new ArrayList<>(Arrays.asList(hotspots));
