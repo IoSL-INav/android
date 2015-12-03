@@ -17,12 +17,17 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.estimote.sdk.Beacon;
+import com.estimote.sdk.BeaconManager;
+import com.estimote.sdk.Region;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class IndoorNavigation extends Application {
 
     private static final String TAG = IndoorNavigation.class.toString();
+    private BeaconManager beaconManager;
 
     @Override
     public void onCreate() {
@@ -40,8 +46,31 @@ public class IndoorNavigation extends Application {
 
         Log.d(TAG, "Application started.");
 
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        // initialise beacon manager
+        beaconManager = new BeaconManager(getApplicationContext());
+        beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
+            @Override
+            public void onEnteredRegion(Region region, List<Beacon> list) {
+                createOnHotspotEnteredNotification("CAR BEACON");
+            }
 
+            @Override
+            public void onExitedRegion(Region region) {
+                createOnHotspotEnteredNotification("BEACON AREA EXITED");
+            }
+        });
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                beaconManager.startMonitoring(new Region(
+                        "monitored region",
+                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF41DFC866B"),
+                        62242, 28193));
+            }
+        });
+
+        // create service to monitor MSI API
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate
                 (new Runnable() {
                     public void run() {

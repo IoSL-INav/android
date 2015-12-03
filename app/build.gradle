@@ -10,6 +10,8 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -27,4 +29,5 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.google.android.gms:play-services:8.3.0'
     compile 'com.mcxiaoke.volley:library:1.0.19'
+    compile 'com.estimote:sdk:0.9.4@aar'
 }

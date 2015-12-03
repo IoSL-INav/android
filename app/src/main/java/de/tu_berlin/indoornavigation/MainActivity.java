@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.estimote.sdk.SystemRequirementsChecker;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -42,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
             loginNameText2.setVisibility(View.INVISIBLE);
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SystemRequirementsChecker.checkWithDefaultDialogs(this); //TODO: this should be moved to
+        // point where we actually need bluetooth
     }
 
     @Override
