@@ -51,19 +51,28 @@ public class IndoorNavigation extends Application {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                createOnHotspotEnteredNotification("CAR BEACON");
+                createOnRegionEnteredNotification(region.getIdentifier());
             }
 
             @Override
             public void onExitedRegion(Region region) {
-                createOnHotspotEnteredNotification("BEACON AREA EXITED");
+                //createOnHotspotEnteredNotification("BEACON AREA EXITED");
             }
         });
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
                 beaconManager.startMonitoring(new Region(
-                        "monitored region",
+                        "Door",
+                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF4BB14CA82"),
+                        42882, 54653));
+            }
+        });
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                beaconManager.startMonitoring(new Region(
+                        "Car",
                         UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF41DFC866B"),
                         62242, 28193));
             }
@@ -156,6 +165,45 @@ public class IndoorNavigation extends Application {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
         mNotificationManager.notify(123, mBuilder.build());
+
+    }
+
+    private void createOnRegionEnteredNotification(String region) {
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_setting_light)
+                        .setContentTitle("Region entered")
+                        .setContentText("You have entered region " + region + ". Would you like" +
+                                "to share your location?");
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, MainActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity. This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MainActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        mBuilder.setAutoCancel(true);
+        mBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        //mBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+        mBuilder.setLights(Color.GRAY, 5000, 5000);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(321, mBuilder.build()); // TODO: change notification ID
 
     }
 
