@@ -8,3 +8,4 @@
 .idea/codeStyleSettings.xml
 .idea/gradle.xml
 .idea/vcs.xml
+app\src\main\assets\config.properties
