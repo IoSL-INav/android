@@ -6,6 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -18,6 +22,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -57,11 +63,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        LatLng mensaCenter = new LatLng(52.509784, 13.326120);
+        LatLng mensaCenter = new LatLng(52.50969128322999, 13.326051905751228);
 
         // add marker in center of mensa and move camera there
         marker = mMap.addMarker(new MarkerOptions().position(mensaCenter).title("Mensa"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mensaCenter, 19));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mensaCenter, 24));
 
         // on map click change position of marker
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -100,27 +106,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         System.out.println("Floor: " + currentFloor + " Marker position is: " + marker.getPosition
                 ());
 
-        /**
-         // Instantiate the RequestQueue.
-         RequestQueue queue = Volley.newRequestQueue(this);
-         String url = "http://jsonplaceholder.typicode.com/users";
 
-         // Request a string response from the provided URL.
-         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-         new Response.Listener<String>() {
-        @Override public void onResponse(String response) {
-        // Display the first 500 characters of the response string.
-        System.out.println("Response is: " + response.substring(0, 500));
-        }
-        }, new Response.ErrorListener() {
-        @Override public void onErrorResponse(VolleyError error) {
-        System.out.println("That didn't work!");
-        }
-        });
-         // Add the request to the RequestQueue.
-         queue.add(stringRequest);
-         // TODO: destroy queue or make singelton queue
-         */
+        String url = "http://piazza.snet.tu-berlin.de/login";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, "Response is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+        ;
+
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+
     }
 
     public void changeFloorUp(View view) {

@@ -5,13 +5,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class LoginActivity extends AppCompatActivity {
 
-    // TODO: sample url for test purposes
-    private static final String URL = "http://www.google.de/";
+    private static final String TAG = LoginActivity.class.toString();
+    private static final String URL = "http://piazza.snet.tu-berlin.de/login/";
 
     /**
      * Opens web view with TU Berlin login form. After successful redirection (TODO: checks url)
@@ -31,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setJavaScriptEnabled(true);
 
-        // define web view client, with onPageFinished function
+        // define web view client, with onPageFinished and shouldOverrideUrlLoading function
         webview.setWebViewClient(new WebViewClient() {
 
             /**
@@ -39,15 +40,29 @@ public class LoginActivity extends AppCompatActivity {
              */
             public void onPageFinished(WebView view, String url) {
 
-                // TODO: change the name of the cookie
-                String token = CookieUtils.getCookie(URL, "NID");
+                if (view.getUrl().equals(URL)) {
 
-                SharedPreferences sharedPreferences = getSharedPreferences(AuthUtils.PREFS_NAME, 0);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("authToken", token);
-                editor.commit();
+                    String token = CookieUtils.getCookie(URL, "connect.sid");
+                    Log.d(TAG, "token: " + token);
 
-                closeWebView();
+                    SharedPreferences sharedPreferences = getSharedPreferences(AuthUtils.PREFS_NAME, 0);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("authToken", token);
+                    editor.commit();
+
+                    closeWebView();
+                }
+            }
+
+            /**
+             * Open redirects in webview instead of in browser
+             * @param view
+             * @param url
+             * @return
+             */
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return false;
             }
 
         });

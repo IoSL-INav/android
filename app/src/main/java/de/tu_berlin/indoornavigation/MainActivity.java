@@ -5,15 +5,25 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.estimote.sdk.SystemRequirementsChecker;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
-        finish();
+        //finish();
 
     }
 
@@ -98,19 +108,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Deletes token from Shared Preferences and AuthUtils. Deletes cookies. Restarts activity.
+     * Sends /login request. Deletes token from Shared Preferences and AuthUtils. Deletes cookies.
+     * Restarts activity.
      */
     public void logout(View view) {
+
+        // send /login request
+        String url = "http://piazza.snet.tu-berlin.de/logout";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d(TAG, "Response is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+        ;
+
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+
+        // delete token from shared preferences
         SharedPreferences sharedPreferences = getSharedPreferences(AuthUtils.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("authToken");
         editor.commit();
 
+        // remove token from AuthUtils
         AuthUtils.token = null;
 
-        CookieUtils.deleteCookies(); //TODO: probably don't need to delete cookies here again
-
-        //TODO: is this ok? will check. Jan
         finish();
         startActivity(getIntent());
     }

@@ -38,11 +38,17 @@ import java.util.concurrent.TimeUnit;
 public class IndoorNavigation extends Application {
 
     private static final String TAG = IndoorNavigation.class.toString();
+    private static Context mContext;
     private BeaconManager beaconManager;
+
+    public static Context getContext() {
+        return mContext;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = this;
 
         Log.d(TAG, "Application started.");
 
@@ -56,7 +62,7 @@ public class IndoorNavigation extends Application {
 
             @Override
             public void onExitedRegion(Region region) {
-                //createOnHotspotEnteredNotification("BEACON AREA EXITED");
+                createOnHotspotEnteredNotification("BEACON AREA EXITED");
             }
         });
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
@@ -72,9 +78,9 @@ public class IndoorNavigation extends Application {
             @Override
             public void onServiceReady() {
                 beaconManager.startMonitoring(new Region(
-                        "Car",
-                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF41DFC866B"),
-                        62242, 28193));
+                        "Shoe",
+                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF44C51822F"),
+                        9386, 56215));
             }
         });
 
@@ -94,7 +100,7 @@ public class IndoorNavigation extends Application {
 
                         if (wifiManager.getConnectionInfo().getSSID().equals("\"eduroam\"")) {
 
-                            String url = MsiApiUtils.URL;
+                            String url = MsiApiUtils.getInstance().getUrl();
 
                             // Request a string response from the provided URL.
                             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
