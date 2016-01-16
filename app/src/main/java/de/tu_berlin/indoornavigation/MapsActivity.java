@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,6 +21,9 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,17 +107,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void sharePosition(View view) {
 
-        System.out.println("Floor: " + currentFloor + " Marker position is: " + marker.getPosition
-                ());
+        Log.d(TAG, "Floor: " + currentFloor + " Marker position is: " + marker.getPosition());
 
+        String url = "http://piazza.snet.tu-berlin.de/users/me/location/";
 
-        String url = "http://piazza.snet.tu-berlin.de/login";
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("userLon", marker.getPosition().longitude);
+            jsonObject.put("userLat", marker.getPosition().latitude);
+            jsonObject.put("userBuilding", "mensa"); //TODO: remove
+            jsonObject.put("userFloor", currentFloor); //TODO: floor format
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
+        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
+                    public void onResponse(JSONObject response) {
                         Log.d(TAG, "Response is: " + response);
                     }
                 }, new Response.ErrorListener() {
@@ -132,7 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
         ;
 
-        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(putRequest);
 
     }
 
