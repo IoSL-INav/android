@@ -9,14 +9,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.estimote.sdk.SystemRequirementsChecker;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,49 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(AuthUtils.PREFS_NAME, 0);
         AuthUtils.token = sharedPreferences.getString("authToken", null);
 
-        // show or hide texts and buttons, based on token availability
+        // check if token is still valid
+        String url = "http://piazza.snet.tu-berlin.de/login";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String responseStr) {
+                        Log.d(TAG, "Response is: " + responseStr);
+                        try {
+                            JSONObject response = new JSONObject(responseStr);
+                            if (response.getString("status").equals("success")) {
+                                Log.d(TAG, "Token is still valid. WIll redirect to menu view.");
+                                showMenuActivity();
+                            } else {
+                                Log.d(TAG, "Token expired. Will redirect to login view.");
+                                showLoginActivity();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //Log.e(TAG, "That didn't work!" + error.toString());
+                Log.d(TAG, "Token expired. Will redirect to login view.");
+                showLoginActivity();
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+        ;
+
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+
+        /*// show or hide texts and buttons, based on token availability
         TextView loginNameText1 = (TextView) findViewById(R.id.loggedin_text1);
         TextView loginNameText2 = (TextView) findViewById(R.id.loggedin_text2);
         Button loginButton = (Button) findViewById(R.id.login_button);
@@ -52,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             logoutButton.setVisibility(View.INVISIBLE);
             loginNameText1.setVisibility(View.INVISIBLE);
             loginNameText2.setVisibility(View.INVISIBLE);
-        }
+        }*/
 
     }
 
@@ -89,22 +132,32 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Starts login (web view) activity
      */
-    public void showLoginActivity(View view) {
+    public void showLoginActivity() {
 
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
-        //finish();
+        finish();
 
     }
 
     /**
      * Starts maps activity
      */
-    public void showMapsActivity(View view) {
+    public void showMapsActivity() {
 
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
+        finish();
+    }
 
+    /**
+     * Starts menu activity
+     */
+    public void showMenuActivity() {
+
+        Intent intent = new Intent(this, MenuActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     /**
@@ -137,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 return params;
             }
         };
-        ;
+
 
         VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
 

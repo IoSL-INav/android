@@ -72,13 +72,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Deletes cookies, closes web view and opens main activity.
+     * Deletes cookies, closes web view and opens menu activity.
      */
     private void closeWebView() {
 
         CookieUtils.deleteCookies();
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MenuActivity.class);
         startActivity(intent);
         finish();
     }
