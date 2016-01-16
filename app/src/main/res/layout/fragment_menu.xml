@@ -22,11 +22,12 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Maps"
+        android:text="Mensa"
         android:id="@+id/maps_button"
-        android:layout_above="@+id/logout_button"
+        android:onClick="showMapsActivityMensa"
+        android:layout_below="@+id/section_label"
         android:layout_centerHorizontal="true"
-        android:onClick="showMapsActivity"/>
+        android:layout_marginTop="55dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -46,5 +47,14 @@
         android:onClick="logout"
         android:layout_above="@+id/exit_button"
         android:layout_alignStart="@+id/maps_button"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Library"
+        android:id="@+id/button"
+        android:onClick="showMapsActivityLibrary"
+        android:layout_below="@+id/maps_button"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

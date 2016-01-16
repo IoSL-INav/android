@@ -88,11 +88,22 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
     }
 
     /**
-     * Starts maps activity
+     * Starts maps activity zoomed in mensa
      */
-    public void showMapsActivity(View view) {
+    public void showMapsActivityMensa(View view) {
 
         Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("id", "mensa");
+        startActivity(intent);
+    }
+
+    /**
+     * Starts maps activity zoomed in library
+     */
+    public void showMapsActivityLibrary(View view) {
+
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("id", "library");
         startActivity(intent);
     }
 

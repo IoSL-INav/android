@@ -10,7 +10,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -66,12 +65,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        LatLng center = null;
+        String title = null;
 
-        LatLng mensaCenter = new LatLng(52.50969128322999, 13.326051905751228);
+        if (getIntent().getExtras().getString("id").equals("mensa")) {
+            center = new LatLng(52.50969128322999, 13.326051905751228);
+            title = "Mensa";
+        } else if (getIntent().getExtras().getString("id").equals("library")){
+            center = new LatLng(52.5104373136039,13.330666981637478);
+            title = "Library";
+        }
 
         // add marker in center of mensa and move camera there
-        marker = mMap.addMarker(new MarkerOptions().position(mensaCenter).title("Mensa"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mensaCenter, 24));
+        marker = mMap.addMarker(new MarkerOptions().position(center).title(title));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 24));
 
         // on map click change position of marker
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
