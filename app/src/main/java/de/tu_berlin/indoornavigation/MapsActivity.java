@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -71,10 +72,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (getIntent().getExtras().getString("id").equals("mensa")) {
             center = new LatLng(52.50969128322999, 13.326051905751228);
             title = "Mensa";
-        } else if (getIntent().getExtras().getString("id").equals("library")){
-            center = new LatLng(52.5104373136039,13.330666981637478);
+        } else if (getIntent().getExtras().getString("id").equals("library")) {
+            center = new LatLng(52.5104373136039, 13.330666981637478);
             title = "Library";
         }
+
+        // test add marker with radius
+        LatLng position = new LatLng(52.509632106317966, 13.326003961265087);
+        int strokeColor = 0xffff0000; //red outline
+        int shadeColor = 0x44ff0000; //opaque red fill
+        mMap.addMarker(new MarkerOptions().position(position).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        mMap.addCircle(new CircleOptions().center(position).radius(2).fillColor(shadeColor)
+                .strokeColor(strokeColor).strokeWidth(8).zIndex(100));
 
         // add marker in center of mensa and move camera there
         marker = mMap.addMarker(new MarkerOptions().position(center).title(title));
