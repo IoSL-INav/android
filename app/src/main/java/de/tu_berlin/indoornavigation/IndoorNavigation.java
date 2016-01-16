@@ -26,6 +26,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -39,10 +40,19 @@ public class IndoorNavigation extends Application {
 
     private static final String TAG = IndoorNavigation.class.toString();
     private static Context mContext;
+    private static ArrayList<Group> groups;
     private BeaconManager beaconManager;
 
     public static Context getContext() {
         return mContext;
+    }
+
+    public static ArrayList<Group> getGroups() {
+        return IndoorNavigation.groups;
+    }
+
+    public static void setGroups(ArrayList<Group> groups) {
+        IndoorNavigation.groups = groups;
     }
 
     @Override
