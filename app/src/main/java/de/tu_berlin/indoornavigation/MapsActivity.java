@@ -109,7 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Log.d(TAG, "Floor: " + currentFloor + " Marker position is: " + marker.getPosition());
 
-        String url = "http://piazza.snet.tu-berlin.de/users/me/location/";
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                "/users/me/location/";
 
         JSONObject jsonObject = new JSONObject();
         try {

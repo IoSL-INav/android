@@ -100,7 +100,7 @@ public class IndoorNavigation extends Application {
 
                         if (wifiManager.getConnectionInfo().getSSID().equals("\"eduroam\"")) {
 
-                            String url = MsiApiUtils.getInstance().getUrl();
+                            String url = PropertiesSingleton.getInstance().getMsiUrl();
 
                             // Request a string response from the provided URL.
                             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,

@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         AuthUtils.token = sharedPreferences.getString("authToken", null);
 
         // check if token is still valid
-        String url = "http://piazza.snet.tu-berlin.de/login";
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() + "/login/";
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
