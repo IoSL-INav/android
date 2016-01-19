@@ -17,9 +17,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
-import com.estimote.sdk.Region;
+import com.estimote.sdk.Nearable;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -27,8 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -64,35 +63,25 @@ public class IndoorNavigation extends Application {
 
         // initialise beacon manager
         beaconManager = new BeaconManager(getApplicationContext());
-        beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
+        beaconManager.setForegroundScanPeriod(10000, 10000); // TODO: set appropriate time
+        beaconManager.setNearableListener(new BeaconManager.NearableListener() {
             @Override
-            public void onEnteredRegion(Region region, List<Beacon> list) {
-                createOnRegionEnteredNotification(region.getIdentifier());
+            public void onNearablesDiscovered(List<Nearable> list) {
+                Log.d(TAG, "onNearablesDiscovered listener");
+                analyzeAndReportBeaconData(list);
+                //TODO: remove
+                for (Nearable nearable : list) {
+                    Log.d(TAG, nearable.toString());
+                }
             }
+        });
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                beaconManager.startNearableDiscovery();
+            }
+        });
 
-            @Override
-            public void onExitedRegion(Region region) {
-                createOnHotspotEnteredNotification("BEACON AREA EXITED");
-            }
-        });
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
-                beaconManager.startMonitoring(new Region(
-                        "Door",
-                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF4BB14CA82"),
-                        42882, 54653));
-            }
-        });
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
-                beaconManager.startMonitoring(new Region(
-                        "Shoe",
-                        UUID.fromString("D0D3FA86-CA76-45EC-9BD9-6AF44C51822F"),
-                        9386, 56215));
-            }
-        });
 
         // create service to monitor MSI API
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -145,7 +134,7 @@ public class IndoorNavigation extends Application {
      *
      * @param hotspot Name of the hotspot.
      */
-    private void createOnHotspotEnteredNotification(String hotspot) {
+    private void createOnHotspotEnteredNotification(String hotspot) { //TODO: possibly remove
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -184,7 +173,7 @@ public class IndoorNavigation extends Application {
 
     }
 
-    private void createOnRegionEnteredNotification(String region) {
+    private void createOnRegionEnteredNotification(String region) {//TODO: possibly remove
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -221,6 +210,44 @@ public class IndoorNavigation extends Application {
         // mId allows you to update the notification later on.
         mNotificationManager.notify(321, mBuilder.build()); // TODO: change notification ID
 
+    }
+
+    /**
+     * Find closest nearable and update location
+     *
+     * @param l
+     */
+    private void analyzeAndReportBeaconData(List<Nearable> l) {
+
+        // find closest nearable based on signal strength
+        LinkedList<Nearable> list = new LinkedList<>(l);
+        Nearable closestNearable = null;
+        if (!list.isEmpty()) {
+            closestNearable = list.getFirst();
+        }
+        for (Nearable nearable : list) {
+            if (nearable.rssi > closestNearable.rssi) {
+                closestNearable = nearable;
+            }
+        }
+
+        // if closest nearable exist, check if it belongs to hotspot, then update location
+        if (closestNearable != null) {
+            Log.d(TAG, "Closest nearable UUID, major, minor: " + closestNearable.region
+                    .getProximityUUID() + " " + closestNearable.region.getMajor() + " " +
+                    closestNearable.region.getMinor());
+
+            Beacon enteredRegion = new Beacon(closestNearable.region.getProximityUUID().toString(), closestNearable
+                    .region.getMajor(), closestNearable.region.getMinor());
+
+            // if closest beacon belong to the hotspot, update location
+            if (HotspotDataSingleton.getInstance().getBeacons().contains(enteredRegion)) {
+                Log.d(TAG, "Detected beacon is part of a hotspot");
+
+                //TODO: send update location request
+
+            }
+        }
     }
 
     /**

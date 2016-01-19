@@ -58,6 +58,9 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        // initialize hotspots data
+        HotspotDataSingleton.getInstance();
+
     }
 
     @Override
