@@ -178,7 +178,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String responseStr) {
-                        Log.d(TAG, "Response is: " + responseStr);
+                        Log.d(TAG, "Looking for friends. Response is: " + responseStr);
                         try {
                             JSONObject response = new JSONObject(responseStr);
                             JSONArray friends = response.getJSONArray("friends");
