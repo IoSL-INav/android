@@ -21,6 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.estimote.sdk.SystemRequirementsChecker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +58,14 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SystemRequirementsChecker.checkWithDefaultDialogs(this); //TODO: this should be moved to
+        // point where we actually need bluetooth
     }
 
     @Override
@@ -109,7 +118,7 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
 
     /**
      * Sends /login request. Deletes token from Shared Preferences and AuthUtils. Deletes cookies.
-     * Restarts activity.
+     * Exits application.
      */
     public void logout(View view) {
 

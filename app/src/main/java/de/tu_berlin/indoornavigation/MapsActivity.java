@@ -10,6 +10,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,17 +79,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             title = "Library";
         }
 
-        // test add marker with radius
-        LatLng position = new LatLng(52.509632106317966, 13.326003961265087);
-        int strokeColor = 0xffff0000; //red outline
-        int shadeColor = 0x44ff0000; //opaque red fill
-        mMap.addMarker(new MarkerOptions().position(position).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-        mMap.addCircle(new CircleOptions().center(position).radius(2).fillColor(shadeColor)
-                .strokeColor(strokeColor).strokeWidth(8).zIndex(100));
+        // show friends
+        showFriends(null);
 
         // add marker in center of mensa and move camera there
         marker = mMap.addMarker(new MarkerOptions().position(center).title(title));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 24));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 22));
 
         // on map click change position of marker
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -117,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * On button clicked, shares position of marker
+     * On button clicked, shares position of marker to the backend
      *
      * @param view
      */
@@ -130,10 +127,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("userLon", marker.getPosition().longitude);
-            jsonObject.put("userLat", marker.getPosition().latitude);
-            jsonObject.put("userBuilding", "mensa"); //TODO: remove
-            jsonObject.put("userFloor", currentFloor); //TODO: floor format
+            //jsonObject.put("userLon", marker.getPosition().longitude);
+            //jsonObject.put("userLat", marker.getPosition().latitude);
+            // jsonObject.put("userBuilding", "mensa"); //TODO: remove
+            //jsonObject.put("userFloor", currentFloor); //TODO: floor format
+            jsonObject.put("userMajor", 62245); // TODO: remove
+            jsonObject.put("userMinor", 37267); // TODO: remove
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -143,7 +142,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Response is: " + response);
+                        Log.d(TAG, "Location shared. Response is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Location sharing: That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(putRequest);
+
+    }
+
+    /**
+     * On button clicked updates locations of friends and shows them on map
+     *
+     * @param view
+     */
+    public void showFriends(View view) {
+
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                "/hotspots/569d8330f1de13a2884338be/active_friends/"; //TODO: change hotspot id
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String responseStr) {
+                        Log.d(TAG, "Response is: " + responseStr);
+                        try {
+                            JSONObject response = new JSONObject(responseStr);
+                            JSONArray friends = response.getJSONArray("friends");
+
+                            // show each friend on the map
+                            for (int i = 0; i < friends.length(); i++) {
+
+                                JSONObject friend = friends.getJSONObject(i);
+                                String name = friend.getString("name");
+                                JSONObject location = friend.getJSONObject("location");
+                                JSONArray coordinates = location.getJSONArray("coordinates");
+                                double lat = coordinates.getDouble(0);
+                                double lng = coordinates.getDouble(1);
+                                int accuracyIndicator = location.getInt("accuracyIndicator");
+                                Log.d(TAG, "location info: lat, lng, accuracy. " + lat + " " + lng
+                                        + " " + accuracyIndicator);
+
+                                // draw marker with corresponding radius
+                                LatLng position = new LatLng(lat, lng);
+                                int strokeColor = 0xffff0000; //red outline
+                                int shadeColor = 0x44ff0000; //opaque red fill
+                                mMap.addMarker(new MarkerOptions().position(position).icon
+                                        (BitmapDescriptorFactory.defaultMarker
+                                                (BitmapDescriptorFactory.HUE_BLUE)).title(name));
+                                if (accuracyIndicator == 1) {
+                                    mMap.addCircle(new CircleOptions().center(position).radius(5)
+                                            .fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8).zIndex(100));
+                                }
+                            }
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -159,9 +228,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return params;
             }
         };
-        ;
 
-        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(putRequest);
+        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
 
     }
 

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -29,8 +31,17 @@ public class LoginActivity extends AppCompatActivity {
         // opens web view, set some settings
         WebView webview = new WebView(this);
         setContentView(webview);
-        webview.getSettings().setBuiltInZoomControls(true);
+
+        // set basic webview settings
+        webview.setFocusable(true);
+        webview.setFocusableInTouchMode(true);
         webview.getSettings().setJavaScriptEnabled(true);
+        webview.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webview.getSettings().setDomStorageEnabled(true);
+        webview.getSettings().setDatabaseEnabled(true);
+        webview.getSettings().setAppCacheEnabled(true);
+        webview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        webview.setWebViewClient(new WebViewClient());
 
         // define web view client, with onPageFinished and shouldOverrideUrlLoading function
         webview.setWebViewClient(new WebViewClient() {
@@ -43,30 +54,24 @@ public class LoginActivity extends AppCompatActivity {
                 if (view.getUrl().equals(URL)) {
 
                     String token = CookieUtils.getCookie(URL, "connect.sid");
-                    Log.d(TAG, "token: " + token);
+                    Log.d(TAG, "Login successful. Token: " + token);
 
+                    // save token into shared preferences
                     SharedPreferences sharedPreferences = getSharedPreferences(AuthUtils.PREFS_NAME, 0);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("authToken", token);
                     editor.commit();
 
+                    // set token in AuthUtils class instance
+                    AuthUtils.token = token;
+
                     closeWebView();
                 }
             }
 
-            /**
-             * Open redirects in webview instead of in browser
-             * @param view
-             * @param url
-             * @return
-             */
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return false;
-            }
-
         });
 
+        // open login url
         webview.loadUrl(URL);
 
     }
