@@ -23,11 +23,33 @@ public class HotspotDataSingleton {
     private static final String TAG = HotspotDataSingleton.class.toString();
     private static HotspotDataSingleton mInstance;
 
-    private LinkedList<Beacon> beacons;
+    private LinkedList<Beacon> beaconsInHotspots;
+    private LinkedList<Beacon> detectedBeacons;
+    private LinkedList<Beacon> detectedNearables;
 
     public HotspotDataSingleton() {
 
-        this.beacons = new LinkedList<>();
+        this.beaconsInHotspots = new LinkedList<>();
+
+        // initialize lists
+        detectedBeacons = new LinkedList<>();
+        detectedNearables = new LinkedList<>();
+
+        // query info about beacons in hotspots
+        refreshBeaconsInHotspots();
+
+    }
+
+    public static synchronized HotspotDataSingleton getInstance() {
+        if (mInstance == null) {
+            mInstance = new HotspotDataSingleton();
+        }
+        return mInstance;
+    }
+
+    public void refreshBeaconsInHotspots() {
+
+        this.beaconsInHotspots.clear();
 
         // get hotspots
         String url = PropertiesSingleton.getInstance().getBackendServerUrl() + "/hotspots";
@@ -51,8 +73,9 @@ public class HotspotDataSingleton {
 
                                     JSONObject beacon = beaconsList.getJSONObject(j);
 
-                                    beacons.add(new Beacon(beacon.getString("companyUUID"),
-                                            beacon.getInt("major"), beacon.getInt("minor")));
+                                    beaconsInHotspots.add(new Beacon(beacon.getString("name"),
+                                            beacon.getString("companyUUID"), beacon.getInt("major"),
+                                            beacon.getInt("minor")));
 
                                 }
 
@@ -81,14 +104,62 @@ public class HotspotDataSingleton {
 
     }
 
-    public static synchronized HotspotDataSingleton getInstance() {
-        if (mInstance == null) {
-            mInstance = new HotspotDataSingleton();
+    public void addDetectedBeacon(Beacon beacon) {
+
+        int index = this.beaconsInHotspots.indexOf(beacon);
+
+        if (index != -1) {
+            beacon.setName(this.beaconsInHotspots.get(index).getName());
+            this.detectedBeacons.add(beacon);
         }
-        return mInstance;
     }
 
-    public LinkedList<Beacon> getBeacons() {
-        return beacons;
+    public void addDetectedNearable(Beacon beacon) {
+
+        int index = this.beaconsInHotspots.indexOf(beacon);
+
+        if (index != -1) {
+            beacon.setName(this.beaconsInHotspots.get(index).getName());
+            this.detectedNearables.add(beacon);
+        }
+    }
+
+    public LinkedList<Beacon> getBeaconsInHotspots() {
+        return beaconsInHotspots;
+    }
+
+    public LinkedList<Beacon> getDetectedBeacons() {
+        return detectedBeacons;
+    }
+
+    public LinkedList<Beacon> getDetectedNearables() {
+        return detectedNearables;
+    }
+
+    public LinkedList<Beacon> getDetectedNearablesAndBeacons() {
+        LinkedList<Beacon> allBeaconsAndNearables = new LinkedList<>(detectedBeacons);
+        allBeaconsAndNearables.addAll(detectedNearables);
+        return allBeaconsAndNearables;
+    }
+
+    /**
+     * Find closest nearable or beacon based on signal strength
+     *
+     * @param
+     */
+    public Beacon getClosestNearableOrBeacon() {
+
+        Beacon closestNearableOrBeacon = null;
+
+        if (!this.getDetectedNearablesAndBeacons().isEmpty()) {
+            closestNearableOrBeacon = this.getDetectedNearablesAndBeacons().getFirst();
+        }
+        for (Beacon beaconOrNearable : this.getDetectedNearablesAndBeacons()) {
+            if (beaconOrNearable.getRssi() > closestNearableOrBeacon.getRssi()) {
+                closestNearableOrBeacon = beaconOrNearable;
+            }
+        }
+
+        return closestNearableOrBeacon;
     }
 }

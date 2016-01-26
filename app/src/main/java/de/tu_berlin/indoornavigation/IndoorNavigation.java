@@ -19,6 +19,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Nearable;
+import com.estimote.sdk.Region;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,10 @@ import java.util.concurrent.TimeUnit;
 public class IndoorNavigation extends Application {
 
     private static final String TAG = IndoorNavigation.class.toString();
+    private static final UUID ESTIMOTE_PROXIMITY_UUID = UUID.fromString
+            ("B9407F30-F5F8-466E-AFF9-25556B57FE6D");
+    private static final Region ALL_ESTIMOTE_BEACONS = new Region("rid", ESTIMOTE_PROXIMITY_UUID,
+            null, null);
     private static Context mContext;
     private static ArrayList<Group> groups;
     private BeaconManager beaconManager;
@@ -63,21 +69,57 @@ public class IndoorNavigation extends Application {
 
         // initialise beacon manager
         beaconManager = new BeaconManager(getApplicationContext());
-        beaconManager.setForegroundScanPeriod(10000, 10000); // TODO: set appropriate time
+        beaconManager.setForegroundScanPeriod(5000, 5000); // TODO: set appropriate time
         beaconManager.setNearableListener(new BeaconManager.NearableListener() {
             @Override
             public void onNearablesDiscovered(List<Nearable> list) {
                 Log.d(TAG, "onNearablesDiscovered listener");
-                analyzeAndReportBeaconData(list);
-                //TODO: remove
+
+                // clear detected nearables
+                HotspotDataSingleton.getInstance().getDetectedNearables().clear();
+
+                // add newly detected nearables
                 for (Nearable nearable : list) {
                     Log.d(TAG, nearable.toString());
+
+                    HotspotDataSingleton.getInstance().addDetectedNearable(new Beacon
+                            (nearable.region.getProximityUUID().toString(), nearable.region.getMajor(),
+                                    nearable.region.getMinor(), nearable.rssi));
                 }
             }
         });
+
+        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+            @Override
+            public void onBeaconsDiscovered(Region region, final List beacons) {
+                Log.d(TAG, "onBeaconsDiscovered listener");
+                Log.d(TAG, "Ranged beacons: " + beacons);
+
+                LinkedList<com.estimote.sdk.Beacon> beaconss = new LinkedList<>(beacons);
+
+                // clear detected beacons
+                HotspotDataSingleton.getInstance().getDetectedBeacons().clear();
+
+
+                for (com.estimote.sdk.Beacon beacon : beaconss) {
+                    Log.d(TAG, beacon.toString());
+
+                    HotspotDataSingleton.getInstance().addDetectedBeacon(new Beacon
+                            (beacon.getProximityUUID().toString(), beacon.getMajor(), beacon.getMinor
+                                    (), beacon.getRssi()));
+
+                }
+            }
+        });
+
         beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
             @Override
             public void onServiceReady() {
+
+                // Beacons ranging.
+                beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
+
+                // Nearable discovery.
                 beaconManager.startNearableDiscovery();
             }
         });
@@ -127,6 +169,19 @@ public class IndoorNavigation extends Application {
 
                     }
                 }, 0, 1, TimeUnit.MINUTES);
+
+        // update location
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "All beacons and nearables");
+                for (Beacon beacon : HotspotDataSingleton.getInstance().getDetectedNearablesAndBeacons()) {
+                    Log.d(TAG, beacon.toString());
+                }
+                Log.d(TAG, "closest beacon or nearable: " + HotspotDataSingleton.getInstance()
+                        .getClosestNearableOrBeacon());
+            }
+        }, 0, 15, TimeUnit.SECONDS);
     }
 
     /**
@@ -210,44 +265,6 @@ public class IndoorNavigation extends Application {
         // mId allows you to update the notification later on.
         mNotificationManager.notify(321, mBuilder.build()); // TODO: change notification ID
 
-    }
-
-    /**
-     * Find closest nearable and update location
-     *
-     * @param l
-     */
-    private void analyzeAndReportBeaconData(List<Nearable> l) {
-
-        // find closest nearable based on signal strength
-        LinkedList<Nearable> list = new LinkedList<>(l);
-        Nearable closestNearable = null;
-        if (!list.isEmpty()) {
-            closestNearable = list.getFirst();
-        }
-        for (Nearable nearable : list) {
-            if (nearable.rssi > closestNearable.rssi) {
-                closestNearable = nearable;
-            }
-        }
-
-        // if closest nearable exist, check if it belongs to hotspot, then update location
-        if (closestNearable != null) {
-            Log.d(TAG, "Closest nearable UUID, major, minor: " + closestNearable.region
-                    .getProximityUUID() + " " + closestNearable.region.getMajor() + " " +
-                    closestNearable.region.getMinor());
-
-            Beacon enteredRegion = new Beacon(closestNearable.region.getProximityUUID().toString(), closestNearable
-                    .region.getMajor(), closestNearable.region.getMinor());
-
-            // if closest beacon belong to the hotspot, update location
-            if (HotspotDataSingleton.getInstance().getBeacons().contains(enteredRegion)) {
-                Log.d(TAG, "Detected beacon is part of a hotspot");
-
-                //TODO: send update location request
-
-            }
-        }
     }
 
     /**
