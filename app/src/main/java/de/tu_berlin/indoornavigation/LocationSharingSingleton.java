@@ -18,16 +18,16 @@ import java.util.Map;
 /**
  * Created by Jan on 19. 01. 2016.
  */
-public class HotspotDataSingleton {
+public class LocationSharingSingleton {
 
-    private static final String TAG = HotspotDataSingleton.class.toString();
-    private static HotspotDataSingleton mInstance;
+    private static final String TAG = LocationSharingSingleton.class.toString();
+    private static LocationSharingSingleton mInstance;
 
     private LinkedList<Beacon> beaconsInHotspots;
     private LinkedList<Beacon> detectedBeacons;
     private LinkedList<Beacon> detectedNearables;
 
-    public HotspotDataSingleton() {
+    public LocationSharingSingleton() {
 
         this.beaconsInHotspots = new LinkedList<>();
 
@@ -40,9 +40,9 @@ public class HotspotDataSingleton {
 
     }
 
-    public static synchronized HotspotDataSingleton getInstance() {
+    public static synchronized LocationSharingSingleton getInstance() {
         if (mInstance == null) {
-            mInstance = new HotspotDataSingleton();
+            mInstance = new LocationSharingSingleton();
         }
         return mInstance;
     }

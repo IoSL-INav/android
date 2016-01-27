@@ -76,13 +76,13 @@ public class IndoorNavigation extends Application {
                 Log.d(TAG, "onNearablesDiscovered listener");
 
                 // clear detected nearables
-                HotspotDataSingleton.getInstance().getDetectedNearables().clear();
+                LocationSharingSingleton.getInstance().getDetectedNearables().clear();
 
                 // add newly detected nearables
                 for (Nearable nearable : list) {
                     Log.d(TAG, nearable.toString());
 
-                    HotspotDataSingleton.getInstance().addDetectedNearable(new Beacon
+                    LocationSharingSingleton.getInstance().addDetectedNearable(new Beacon
                             (nearable.region.getProximityUUID().toString(), nearable.region.getMajor(),
                                     nearable.region.getMinor(), nearable.rssi));
                 }
@@ -98,13 +98,13 @@ public class IndoorNavigation extends Application {
                 LinkedList<com.estimote.sdk.Beacon> beaconss = new LinkedList<>(beacons);
 
                 // clear detected beacons
-                HotspotDataSingleton.getInstance().getDetectedBeacons().clear();
+                LocationSharingSingleton.getInstance().getDetectedBeacons().clear();
 
 
                 for (com.estimote.sdk.Beacon beacon : beaconss) {
                     Log.d(TAG, beacon.toString());
 
-                    HotspotDataSingleton.getInstance().addDetectedBeacon(new Beacon
+                    LocationSharingSingleton.getInstance().addDetectedBeacon(new Beacon
                             (beacon.getProximityUUID().toString(), beacon.getMajor(), beacon.getMinor
                                     (), beacon.getRssi()));
 
@@ -175,10 +175,10 @@ public class IndoorNavigation extends Application {
             @Override
             public void run() {
                 Log.d(TAG, "All beacons and nearables");
-                for (Beacon beacon : HotspotDataSingleton.getInstance().getDetectedNearablesAndBeacons()) {
+                for (Beacon beacon : LocationSharingSingleton.getInstance().getDetectedNearablesAndBeacons()) {
                     Log.d(TAG, beacon.toString());
                 }
-                Log.d(TAG, "closest beacon or nearable: " + HotspotDataSingleton.getInstance()
+                Log.d(TAG, "closest beacon or nearable: " + LocationSharingSingleton.getInstance()
                         .getClosestNearableOrBeacon());
             }
         }, 0, 15, TimeUnit.SECONDS);
