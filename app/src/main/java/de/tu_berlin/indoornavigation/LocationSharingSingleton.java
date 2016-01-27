@@ -26,6 +26,8 @@ public class LocationSharingSingleton {
     private LinkedList<Beacon> beaconsInHotspots;
     private LinkedList<Beacon> detectedBeacons;
     private LinkedList<Beacon> detectedNearables;
+    private String MSIBuildingName;
+    private String MSIFloor;
 
     public LocationSharingSingleton() {
 
@@ -134,6 +136,22 @@ public class LocationSharingSingleton {
 
     public LinkedList<Beacon> getDetectedNearables() {
         return detectedNearables;
+    }
+
+    public String getMSIBuildingName() {
+        return MSIBuildingName;
+    }
+
+    public void setMSIBuildingName(String MSIBuildingName) {
+        this.MSIBuildingName = MSIBuildingName;
+    }
+
+    public String getMSIFloor() {
+        return MSIFloor;
+    }
+
+    public void setMSIFloor(String MSIFloor) {
+        this.MSIFloor = MSIFloor;
     }
 
     public LinkedList<Beacon> getDetectedNearablesAndBeacons() {
