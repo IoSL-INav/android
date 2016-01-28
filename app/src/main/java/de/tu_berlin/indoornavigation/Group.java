@@ -1,5 +1,7 @@
 package de.tu_berlin.indoornavigation;
 
+import java.util.LinkedList;
+
 /**
  * Created by Jan on 16. 01. 2016.
  */
@@ -7,11 +9,13 @@ public class Group {
     public boolean autoPing;
     private String id;
     private String name;
+    private LinkedList<String> members;
 
-    public Group(String id, String name, boolean autoPing) {
+    public Group(String id, String name, boolean autoPing, LinkedList<String> members) {
         this.id = id;
         this.name = name;
         this.autoPing = autoPing;
+        this.members = members;
     }
 
     public String getId() {
@@ -36,5 +40,13 @@ public class Group {
 
     public void setAutoPing(boolean autoPing) {
         this.autoPing = autoPing;
+    }
+
+    public LinkedList<String> getMembers() {
+        return members;
+    }
+
+    public void setMembers(LinkedList<String> members) {
+        this.members = members;
     }
 }

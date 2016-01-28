@@ -64,13 +64,18 @@ public class UsersGroupsDataSingleton {
                             LinkedList<Group> groups = new LinkedList<>();
                             String id = "";
                             String name = "";
+                            LinkedList<String> members = new LinkedList<>();
                             boolean autoPing = false;
                             for (int i = 0; i < responseArr.length(); i++) {
                                 JSONObject obj = responseArr.getJSONObject(i);
                                 id = obj.getString("_id");
                                 name = obj.getString("name");
                                 autoPing = false;
-                                groups.add(new Group(id, name, autoPing));
+                                JSONArray membersJson = obj.getJSONArray("members");
+                                for (int j=0; j<membersJson.length(); j++){
+                                    members.add(membersJson.getJSONObject(j).getString("name"));
+                                }
+                                groups.add(new Group(id, name, autoPing, members));
                             }
                             setGroups(groups);
                         } catch (JSONException e) {
