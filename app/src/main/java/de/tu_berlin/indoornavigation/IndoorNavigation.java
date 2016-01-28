@@ -166,6 +166,10 @@ public class IndoorNavigation extends Application {
                 }
                 Log.d(TAG, "closest beacon or nearable: " + LocationSharingSingleton.getInstance()
                         .getClosestNearableOrBeacon());
+
+                Log.d(TAG, "msi building: " + LocationSharingSingleton.getInstance()
+                        .getMSIBuildingName() + " floor: " + LocationSharingSingleton.getInstance
+                        ().getMSIFloor());
             }
         }, 0, 15, TimeUnit.SECONDS);
     }
@@ -178,7 +182,7 @@ public class IndoorNavigation extends Application {
      */
     private String[] parseMsiApiResponse(String response) {
 
-        String[] buildingNameFloor = null;
+        String[] buildingNameFloor = new String[2];
 
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -187,7 +191,7 @@ public class IndoorNavigation extends Application {
             parser.next();
             if (parser.getAttributeCount() >= 2) {
                 buildingNameFloor[0] = parser.getAttributeValue(2);
-                buildingNameFloor[0] = parser.getAttributeValue(3);
+                buildingNameFloor[1] = parser.getAttributeValue(3);
             }
         } catch (XmlPullParserException e) {
             e.printStackTrace();
