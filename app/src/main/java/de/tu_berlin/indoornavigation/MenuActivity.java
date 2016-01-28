@@ -1,6 +1,8 @@
 package de.tu_berlin.indoornavigation;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,14 +20,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.estimote.sdk.SystemRequirementsChecker;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,8 +79,8 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
     protected void onResume() {
         super.onResume();
 
-        SystemRequirementsChecker.checkWithDefaultDialogs(this); //TODO: this should be moved to
-        // point where we actually need bluetooth
+        SystemRequirementsChecker.checkWithDefaultDialogs(this);
+
     }
 
     @Override
@@ -83,8 +91,8 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
         dialog.setContentView(R.layout.members_list);
 
         ListView lv = (ListView) dialog.findViewById(R.id.member_names);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,android.R.layout
-                .simple_list_item_1 ,item.getMembers());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout
+                .simple_list_item_1, item.getMembers());
         lv.setAdapter(adapter);
         dialog.setCancelable(true);
         dialog.setTitle("ListView");
@@ -189,6 +197,74 @@ public class MenuActivity extends AppCompatActivity implements MyGroupsRecyclerV
 
         finish();
         System.exit(0);
+    }
+
+    public void showAddFriendDialog(MenuItem item) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Title");
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                String email = input.getText().toString();
+
+                Log.d(TAG, email);
+
+                String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                        "/companionrequests/";
+
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("userEmail", email); // TODO: remove
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                // Request a string response from the provided URL.
+                JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.POST, url,
+                        jsonObject,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(TAG, "Friend request send. Response is: " + response);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, "Friend request send: That didn't work!" + error.toString());
+                    }
+                }) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> params = new HashMap<String, String>();
+                        params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                        return params;
+                    }
+                };
+
+                VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(putRequest);
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
     }
 
     /**
