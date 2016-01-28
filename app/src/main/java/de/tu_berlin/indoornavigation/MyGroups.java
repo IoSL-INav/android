@@ -64,8 +64,8 @@ public class MyGroups extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyGroupsRecyclerViewAdapter(IndoorNavigation.getGroups(),
-                    mListener));
+            recyclerView.setAdapter(new MyGroupsRecyclerViewAdapter(UsersGroupsDataSingleton
+                    .getInstance().getGroups(), mListener));
         }
         return view;
     }

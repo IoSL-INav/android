@@ -19,7 +19,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -38,20 +37,12 @@ public class IndoorNavigation extends Application {
     private static final Region ALL_ESTIMOTE_BEACONS = new Region("rid", ESTIMOTE_PROXIMITY_UUID,
             null, null);
     private static Context mContext;
-    private static ArrayList<Group> groups;
     private BeaconManager beaconManager;
 
     public static Context getContext() {
         return mContext;
     }
 
-    public static ArrayList<Group> getGroups() {
-        return IndoorNavigation.groups;
-    }
-
-    public static void setGroups(ArrayList<Group> groups) {
-        IndoorNavigation.groups = groups;
-    }
 
     @Override
     public void onCreate() {

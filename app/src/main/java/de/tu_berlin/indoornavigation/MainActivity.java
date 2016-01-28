@@ -12,11 +12,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject response = new JSONObject(responseStr);
                             if (response.getString("status").equals("success")) {
                                 Log.d(TAG, "Token is still valid. WIll redirect to menu view.");
-                                queryGroups();
                                 showMenuActivity();
                             } else {
                                 Log.d(TAG, "Token expired. Will redirect to login view.");
@@ -100,54 +97,4 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    /**
-     * Gets data about groups and saves it to IndoorNavigation class instance
-     */
-    private void queryGroups() {
-        // get groups
-        String url = PropertiesSingleton.getInstance().getBackendServerUrl() + "/users/me/groups";
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String responseStr) {
-                        Log.d(TAG, "Response is: " + responseStr);
-
-                        try {
-                            JSONArray responseArr = new JSONArray(responseStr);
-
-                            ArrayList<Group> groups = new ArrayList<>();
-                            String id = "";
-                            String name = "";
-                            boolean autoPing = false;
-                            for (int i = 0; i < responseArr.length(); i++) {
-                                JSONObject obj = responseArr.getJSONObject(i);
-                                id = obj.getString("_id");
-                                name = obj.getString("name");
-                                autoPing = false;
-                                groups.add(new Group(id, name, autoPing));
-                            }
-                            IndoorNavigation.setGroups(groups);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "That didn't work!" + error.toString());
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> params = new HashMap<String, String>();
-                params.put("Cookie", "connect.sid=" + AuthUtils.token);
-
-                return params;
-            }
-        };
-
-        VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(stringRequest);
-    }
 }

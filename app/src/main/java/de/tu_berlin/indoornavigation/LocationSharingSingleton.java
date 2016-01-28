@@ -31,11 +31,10 @@ public class LocationSharingSingleton {
 
     public LocationSharingSingleton() {
 
-        this.beaconsInHotspots = new LinkedList<>();
-
         // initialize lists
-        detectedBeacons = new LinkedList<>();
-        detectedNearables = new LinkedList<>();
+        this.beaconsInHotspots = new LinkedList<>();
+        this.detectedBeacons = new LinkedList<>();
+        this.detectedNearables = new LinkedList<>();
 
         // query info about beacons in hotspots
         refreshBeaconsInHotspots();
