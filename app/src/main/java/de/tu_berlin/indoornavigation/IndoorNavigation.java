@@ -170,6 +170,11 @@ public class IndoorNavigation extends Application {
                 Log.d(TAG, "msi building: " + LocationSharingSingleton.getInstance()
                         .getMSIBuildingName() + " floor: " + LocationSharingSingleton.getInstance
                         ().getMSIFloor());
+
+                // share location TODO: should this be done here?
+                LocationSharingSingleton.getInstance().shareBeaconLocation();
+                //LocationSharingSingleton.getInstance().shareMSILocation(); TODO: uncomment
+
             }
         }, 0, 15, TimeUnit.SECONDS);
     }

@@ -127,12 +127,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         JSONObject jsonObject = new JSONObject();
         try {
-            //jsonObject.put("userLon", marker.getPosition().longitude);
-            //jsonObject.put("userLat", marker.getPosition().latitude);
+            jsonObject.put("userLon", marker.getPosition().longitude);
+            jsonObject.put("userLat", marker.getPosition().latitude);
             // jsonObject.put("userBuilding", "mensa"); //TODO: remove
             //jsonObject.put("userFloor", currentFloor); //TODO: floor format
-            jsonObject.put("userMajor", 62245); // TODO: remove
-            jsonObject.put("userMinor", 37267); // TODO: remove
         } catch (JSONException e) {
             e.printStackTrace();
         }

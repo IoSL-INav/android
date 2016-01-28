@@ -5,6 +5,7 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -179,4 +180,93 @@ public class LocationSharingSingleton {
 
         return closestNearableOrBeacon;
     }
+
+    public void shareBeaconLocation() {
+
+        Beacon closestBeaconOrNearable = getClosestNearableOrBeacon();
+
+        if (closestBeaconOrNearable != null) {
+
+
+            String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                    "/users/me/location/";
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("userMajor", closestBeaconOrNearable.getMajor());
+                jsonObject.put("userMinor", closestBeaconOrNearable.getMinor());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // Request a string response from the provided URL.
+            JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.d(TAG, "Beacon based location shared. Response is: " + response);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(TAG, "Beacon based location sharing: That didn't work!" + error.toString());
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                    return params;
+                }
+            };
+
+            VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
+        }
+    }
+
+    public void shareMSILocation() {
+
+        String msiBuildingName = getMSIBuildingName();
+        String msiFloor = getMSIFloor();
+
+        if (msiBuildingName != null && msiFloor != null) {
+
+            String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                    "/users/me/location/";
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("userBuilding", msiBuildingName);
+                jsonObject.put("userFloor", msiFloor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // Request a string response from the provided URL.
+            JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Log.d(TAG, "MSI based location shared. Response is: " + response);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(TAG, "MSI based location sharing: That didn't work!" + error.toString());
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    HashMap<String, String> params = new HashMap<String, String>();
+                    params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                    return params;
+                }
+            };
+
+            VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
+        }
+    }
+
 }
