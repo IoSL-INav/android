@@ -188,8 +188,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 String name = friend.getString("name");
                                 JSONObject location = friend.getJSONObject("location");
                                 JSONArray coordinates = location.getJSONArray("coordinates");
-                                double lat = coordinates.getDouble(0);
-                                double lng = coordinates.getDouble(1);
+                                double lng = coordinates.getDouble(0);
+                                double lat = coordinates.getDouble(1);
                                 int accuracyIndicator = location.getInt("accuracyIndicator");
                                 Log.d(TAG, "location info: lat, lng, accuracy. " + lat + " " + lng
                                         + " " + accuracyIndicator);
