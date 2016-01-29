@@ -16,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -41,6 +43,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<GroundOverlay> overlays = new ArrayList<>();
     private int currentFloor = 0;
     private int numberOfFloors = 2;
+    private LinkedList<Marker> friendsMarkers = new LinkedList<>();
+    private LinkedList<Circle> friendsMarkersCircles = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +172,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void showFriends(View view) {
 
+        // remove old markers and circles
+        for (Marker marker : friendsMarkers) {
+            marker.remove();
+        }
+        friendsMarkers.clear();
+
+        for (Circle circle : friendsMarkersCircles){
+            circle.remove();
+        }
+        friendsMarkersCircles.clear();
+
+        // backend url
         String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
                 "/hotspots/569d8330f1de13a2884338be/active_friends/"; //TODO: change hotspot id
 
@@ -198,12 +214,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 LatLng position = new LatLng(lat, lng);
                                 int strokeColor = 0xffff0000; //red outline
                                 int shadeColor = 0x44ff0000; //opaque red fill
-                                mMap.addMarker(new MarkerOptions().position(position).icon
-                                        (BitmapDescriptorFactory.defaultMarker
-                                                (BitmapDescriptorFactory.HUE_BLUE)).title(name));
+                                friendsMarkers.add(mMap.addMarker(new MarkerOptions().position
+                                        (position).icon(BitmapDescriptorFactory.defaultMarker
+                                        (BitmapDescriptorFactory.HUE_BLUE)).title(name)));
                                 if (accuracyIndicator == 1) {
-                                    mMap.addCircle(new CircleOptions().center(position).radius(5)
-                                            .fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8).zIndex(100));
+                                    friendsMarkersCircles.add(mMap.addCircle(new CircleOptions()
+                                            .center(position).radius(5).fillColor(shadeColor).strokeColor(strokeColor)
+                                            .strokeWidth(8).zIndex(100)));
                                 }
                             }
 
