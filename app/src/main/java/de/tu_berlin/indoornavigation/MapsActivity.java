@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -37,13 +38,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.toString();
     // MSI based flood names for different buildings
-    String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
-    String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss", "2. Obergeschoss", "3. " +
-            "Obergeschoss", "4. Obergeschoss"};
+    private String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2.  OG"};
+    private String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss",
+            "2. Obergeschoss", "3. Obergeschoss", "4. Obergeschoss"};
     // hold data about open building
     private String buildingName = null;
     private LatLng buildingCenter = null;
-    private String[] buildingFloorNames;
+    private LinkedList<String> buildingFloorNames;
     private int numberOfFloors;
     // map and marker data
     private TextView currentFloorText;
@@ -51,6 +52,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker marker;
     private ArrayList<GroundOverlay> overlays = new ArrayList<>();
     private int currentFloor = 0;
+    private LinkedList<MarkerOptions>[] friendsMarkerOptions;
+    private LinkedList<CircleOptions>[] friendsMarkersCircleOptions;
     private LinkedList<Marker> friendsMarkers = new LinkedList<>();
     private LinkedList<Circle> friendsMarkersCircles = new LinkedList<>();
 
@@ -84,13 +87,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (getIntent().getExtras().getString("id").equals("mensa")) {
             buildingCenter = new LatLng(52.50969128322999, 13.326051905751228);
             buildingName = "Mensa";
-            buildingFloorNames = mensaFloorNames;
+            buildingFloorNames = new LinkedList<>(Arrays.asList(mensaFloorNames));
             numberOfFloors = 2;
         } else if (getIntent().getExtras().getString("id").equals("library")) {
             buildingCenter = new LatLng(52.5104373136039, 13.330666981637478);
             buildingName = "BIB";
-            buildingFloorNames = libraryFloorNames;
+            buildingFloorNames = new LinkedList<>(Arrays.asList(libraryFloorNames));
             numberOfFloors = 5;
+        }
+
+        // initialize linked lists
+        friendsMarkerOptions = new LinkedList[numberOfFloors];
+        for (int i = 0; i < friendsMarkerOptions.length; i++) {
+            friendsMarkerOptions[i] = new LinkedList<>();
+        }
+        friendsMarkersCircleOptions = new LinkedList[numberOfFloors];
+        for (int i = 0; i < friendsMarkersCircleOptions.length; i++) {
+            friendsMarkersCircleOptions[i] = new LinkedList<>();
         }
 
         // show friends
@@ -134,7 +147,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void pinpointLocation(View view) {
 
-        Log.d(TAG, "Building: " + buildingName + " Floor: " + buildingFloorNames[currentFloor] +
+        Log.d(TAG, "Building: " + buildingName + " Floor: " + buildingFloorNames.get(currentFloor) +
                 " Marker position is: " + marker.getPosition());
 
         CheckBox pinpointLocationCheckbox = (CheckBox) findViewById(R.id
@@ -143,7 +156,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (pinpointLocationCheckbox.isChecked()) {
             LocationSharingSingleton.getInstance().setPinpointedCoordinates(marker.getPosition());
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
-            LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames[currentFloor]);
+            LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames
+                    .get(currentFloor));
         } else {
             LocationSharingSingleton.getInstance().setPinpointedCoordinates(null);
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(null);
@@ -160,15 +174,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void showFriends(View view) {
 
         // remove old markers and circles
-        for (Marker marker : friendsMarkers) {
-            marker.remove();
+        for (int i = 0; i < friendsMarkerOptions.length; i++) {
+            friendsMarkerOptions[i].clear();
         }
-        friendsMarkers.clear();
 
-        for (Circle circle : friendsMarkersCircles) {
-            circle.remove();
+        for (int i = 0; i < friendsMarkersCircleOptions.length; i++) {
+            friendsMarkersCircleOptions[i].clear();
         }
-        friendsMarkersCircles.clear();
 
         // backend url
         String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
@@ -187,28 +199,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             // show each friend on the map
                             for (int i = 0; i < friends.length(); i++) {
 
+                                double lng = 0;
+                                double lat = 0;
+                                String buildingName = null;
+                                String buildingFloor = null;
+
                                 JSONObject friend = friends.getJSONObject(i);
                                 String name = friend.getString("name");
                                 JSONObject location = friend.getJSONObject("location");
-                                JSONArray coordinates = location.getJSONArray("coordinates");
-                                double lng = coordinates.getDouble(0);
-                                double lat = coordinates.getDouble(1);
+                                if (location.has("coordinates")) {
+                                    JSONArray coordinates = location.getJSONArray("coordinates");
+                                    lng = coordinates.getDouble(0);
+                                    lat = coordinates.getDouble(1);
+                                }
                                 int accuracyIndicator = location.getInt("accuracyIndicator");
-                                Log.d(TAG, "location info: lat, lng, accuracy. " + lat + " " + lng
-                                        + " " + accuracyIndicator);
 
-                                // draw marker with corresponding radius
+                                if (location.has("building")) {
+                                    buildingName = location.getString("building");
+                                }
+
+                                if (location.has("floor")) {
+                                    buildingFloor = location.getString("floor");
+                                }
+
+                                Log.d(TAG, "location info: lat, lng, accuracy. " + lat + " " + lng
+                                        + " " + accuracyIndicator + " building: " + buildingName
+                                        + " floor: " + buildingFloor);
+
+                                // add marker options and circle options
                                 LatLng position = new LatLng(lat, lng);
                                 int strokeColor = 0xffff0000; //red outline
                                 int shadeColor = 0x44ff0000; //opaque red fill
-                                friendsMarkers.add(mMap.addMarker(new MarkerOptions().position
-                                        (position).icon(BitmapDescriptorFactory.defaultMarker
-                                        (BitmapDescriptorFactory.HUE_BLUE)).title(name)));
-                                if (accuracyIndicator == 1) {
-                                    friendsMarkersCircles.add(mMap.addCircle(new CircleOptions()
-                                            .center(position).radius(5).fillColor(shadeColor).strokeColor(strokeColor)
-                                            .strokeWidth(8).zIndex(100)));
+
+                                int floorIndex = buildingFloorNames.indexOf(buildingFloor);
+                                if (floorIndex != -1) { //TODO: test
+                                    friendsMarkerOptions[floorIndex].add
+                                            (new
+                                                    MarkerOptions().position
+                                                    (position).icon(BitmapDescriptorFactory.defaultMarker
+                                                    (BitmapDescriptorFactory.HUE_BLUE)).title(name));
+                                    if (accuracyIndicator == 1) {
+                                        friendsMarkersCircleOptions[floorIndex].add
+                                                (new
+                                                        CircleOptions()
+                                                        .center(position).radius(5).fillColor(shadeColor).strokeColor(strokeColor)
+                                                        .strokeWidth(8).zIndex(100));
+                                    }
                                 }
+
+                                // draw markers on selected floor
+                                drawFriendsLocations();
                             }
 
 
@@ -263,6 +303,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 overlays.get(i).setVisible(false);
             }
         }
+        drawFriendsLocations();
     }
 
     private void setCurrentFloorText(int floor) {
@@ -270,6 +311,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             currentFloorText.setText("EG");
         } else {
             currentFloorText.setText(floor + "G");
+        }
+    }
+
+    private void drawFriendsLocations() {
+
+        // delete old markers
+        for (Marker marker : friendsMarkers) {
+            marker.remove();
+        }
+        friendsMarkers.clear();
+        for (Circle circle : friendsMarkersCircles) {
+            circle.remove();
+        }
+        friendsMarkersCircles.clear();
+
+        // draw new markers
+        for (MarkerOptions markerOptions : friendsMarkerOptions[currentFloor]) {
+            friendsMarkers.add(mMap.addMarker(markerOptions));
+        }
+        for (CircleOptions circleOptions : friendsMarkersCircleOptions[currentFloor]) {
+            friendsMarkersCircles.add(mMap.addCircle(circleOptions));
         }
     }
 
