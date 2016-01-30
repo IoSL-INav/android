@@ -37,12 +37,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.toString();
 
+    // hold data about open building
+    private String buildingName = null;
+    private LatLng buildingCenter = null;
+    private String[] buildingFloorNames;
+    private int numberOfFloors;
+
+    // MSI based flood names for different buildings
+    String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
+    String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss", "2. Obergeschoss", "3. " +
+            "Obergeschoss", "4. Obergeschoss"};
+
+    // map and marker data
     private TextView currentFloorText;
     private GoogleMap mMap;
     private Marker marker;
     private ArrayList<GroundOverlay> overlays = new ArrayList<>();
     private int currentFloor = 0;
-    private int numberOfFloors = 2;
     private LinkedList<Marker> friendsMarkers = new LinkedList<>();
     private LinkedList<Circle> friendsMarkersCircles = new LinkedList<>();
 
@@ -72,23 +83,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng center = null;
-        String title = null;
 
         if (getIntent().getExtras().getString("id").equals("mensa")) {
-            center = new LatLng(52.50969128322999, 13.326051905751228);
-            title = "Mensa";
+            buildingCenter = new LatLng(52.50969128322999, 13.326051905751228);
+            buildingName = "Mensa";
+            buildingFloorNames = mensaFloorNames;
+            numberOfFloors = 2;
         } else if (getIntent().getExtras().getString("id").equals("library")) {
-            center = new LatLng(52.5104373136039, 13.330666981637478);
-            title = "Library";
+            buildingCenter = new LatLng(52.5104373136039, 13.330666981637478);
+            buildingName = "BIB";
+            buildingFloorNames = libraryFloorNames;
+            numberOfFloors = 5;
         }
 
         // show friends
         showFriends(null);
 
-        // add marker in center of mensa and move camera there
-        marker = mMap.addMarker(new MarkerOptions().position(center).title(title));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 22));
+        // add marker in buildingCenter of mensa and move camera there
+        marker = mMap.addMarker(new MarkerOptions().position(buildingCenter).title(buildingName));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(buildingCenter, 22));
 
         // on map click change position of marker
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -133,8 +146,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             jsonObject.put("userLon", marker.getPosition().longitude);
             jsonObject.put("userLat", marker.getPosition().latitude);
-            // jsonObject.put("userBuilding", "mensa"); //TODO: remove
-            //jsonObject.put("userFloor", currentFloor); //TODO: floor format
+            jsonObject.put("userBuilding", buildingName);
+            jsonObject.put("userFloor", buildingFloorNames[currentFloor]);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -178,7 +191,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         friendsMarkers.clear();
 
-        for (Circle circle : friendsMarkersCircles){
+        for (Circle circle : friendsMarkersCircles) {
             circle.remove();
         }
         friendsMarkersCircles.clear();

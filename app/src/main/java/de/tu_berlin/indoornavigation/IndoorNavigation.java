@@ -154,7 +154,7 @@ public class IndoorNavigation extends Application {
                         }
 
                     }
-                }, 0, 1, TimeUnit.MINUTES);
+                }, 0, 14, TimeUnit.SECONDS);
 
         // update location
         scheduler.scheduleAtFixedRate(new Runnable() {
@@ -173,7 +173,7 @@ public class IndoorNavigation extends Application {
 
                 // share location TODO: should this be done here?
                 LocationSharingSingleton.getInstance().shareBeaconLocation();
-                //LocationSharingSingleton.getInstance().shareMSILocation(); TODO: uncomment
+                LocationSharingSingleton.getInstance().shareMSILocation();
 
             }
         }, 0, 15, TimeUnit.SECONDS);
