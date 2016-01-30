@@ -132,6 +132,9 @@ public class IndoorNavigation extends Application {
                                     new Response.Listener<String>() {
                                         @Override
                                         public void onResponse(String response) {
+
+                                            Log.d(TAG, "MSI response: " + response);
+
                                             String[] buildingNameFloor = parseMsiApiResponse
                                                     (response);
 
@@ -145,7 +148,8 @@ public class IndoorNavigation extends Application {
                                     }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.e(TAG, "Error while making request");
+                                    Log.e(TAG, "Error while making MSI request. " + error.toString
+                                            ());
                                 }
                             });
 
@@ -154,26 +158,15 @@ public class IndoorNavigation extends Application {
                         }
 
                     }
-                }, 0, 14, TimeUnit.SECONDS);
+                }, 0, 30, TimeUnit.SECONDS);
 
         // update location
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "All beacons and nearables");
-                for (Beacon beacon : LocationSharingSingleton.getInstance().getDetectedNearablesAndBeacons()) {
-                    Log.d(TAG, beacon.toString());
-                }
-                Log.d(TAG, "closest beacon or nearable: " + LocationSharingSingleton.getInstance()
-                        .getClosestNearableOrBeacon());
 
-                Log.d(TAG, "msi building: " + LocationSharingSingleton.getInstance()
-                        .getMSIBuildingName() + " floor: " + LocationSharingSingleton.getInstance
-                        ().getMSIFloor());
-
-                // share location TODO: should this be done here?
-                LocationSharingSingleton.getInstance().shareBeaconLocation();
-                LocationSharingSingleton.getInstance().shareMSILocation();
+                // update location
+                LocationSharingSingleton.getInstance().updateLocation();
 
             }
         }, 0, 15, TimeUnit.SECONDS);

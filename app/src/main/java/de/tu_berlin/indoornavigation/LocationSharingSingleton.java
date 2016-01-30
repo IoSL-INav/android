@@ -7,6 +7,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +30,9 @@ public class LocationSharingSingleton {
     private LinkedList<Beacon> detectedNearables;
     private String MSIBuildingName;
     private String MSIFloor;
+    private LatLng pinpointedCoordinates;
+    private String pinpointedBuildingName;
+    private String pinpointedFloor;
 
     public LocationSharingSingleton() {
 
@@ -154,6 +158,15 @@ public class LocationSharingSingleton {
         this.MSIFloor = MSIFloor;
     }
 
+    public LatLng getPinpointedCoordinates() {
+        return pinpointedCoordinates;
+    }
+
+    public void setPinpointedCoordinates(LatLng pinpointedCoordinates) {
+        this.pinpointedCoordinates = pinpointedCoordinates;
+    }
+
+
     public LinkedList<Beacon> getDetectedNearablesAndBeacons() {
         LinkedList<Beacon> allBeaconsAndNearables = new LinkedList<>(detectedBeacons);
         allBeaconsAndNearables.addAll(detectedNearables);
@@ -181,92 +194,99 @@ public class LocationSharingSingleton {
         return closestNearableOrBeacon;
     }
 
-    public void shareBeaconLocation() {
+    /**
+     * Updates location based on most accurate location info available
+     */
+    public void updateLocation() {
 
         Beacon closestBeaconOrNearable = getClosestNearableOrBeacon();
 
+        Log.d(TAG, "Updating location");
+        Log.d(TAG, "Pinpointed coordinates: " + pinpointedCoordinates + " building: " +
+                pinpointedBuildingName + " floor: " + pinpointedFloor);
         if (closestBeaconOrNearable != null) {
+            Log.d(TAG, "Closest beacon: " + closestBeaconOrNearable.getName());
+        } else {
+            Log.d(TAG, "Closest beacon: null");
+        }
+        Log.d(TAG, "MSI building: " + MSIBuildingName + " floor: " + MSIFloor);
 
+        // json object with location
+        JSONObject jsonObject = new JSONObject();
 
-            String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
-                    "/users/me/location/";
-
-            JSONObject jsonObject = new JSONObject();
+        // add the most accurate location available to json object
+        if (pinpointedCoordinates != null && pinpointedBuildingName != null && pinpointedFloor !=
+                null) {
+            try {
+                jsonObject.put("userLon", pinpointedCoordinates.longitude);
+                jsonObject.put("userLat", pinpointedCoordinates.latitude);
+                jsonObject.put("userBuilding", pinpointedBuildingName);
+                jsonObject.put("userFloor", pinpointedFloor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (closestBeaconOrNearable != null) {
             try {
                 jsonObject.put("userMajor", closestBeaconOrNearable.getMajor());
                 jsonObject.put("userMinor", closestBeaconOrNearable.getMinor());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            // Request a string response from the provided URL.
-            JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            Log.d(TAG, "Beacon based location shared. Response is: " + response);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Beacon based location sharing: That didn't work!" + error.toString());
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> params = new HashMap<String, String>();
-                    params.put("Cookie", "connect.sid=" + AuthUtils.token);
-
-                    return params;
-                }
-            };
-
-            VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
-        }
-    }
-
-    public void shareMSILocation() {
-
-        String msiBuildingName = getMSIBuildingName();
-        String msiFloor = getMSIFloor();
-
-        if (msiBuildingName != null && msiFloor != null) {
-
-            String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
-                    "/users/me/location/";
-
-            JSONObject jsonObject = new JSONObject();
+        } else if (getMSIBuildingName() != null && getMSIFloor() != null) {
             try {
-                jsonObject.put("userBuilding", msiBuildingName);
-                jsonObject.put("userFloor", msiFloor);
+                jsonObject.put("userBuilding", getMSIBuildingName());
+                jsonObject.put("userFloor", getMSIFloor());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-            // Request a string response from the provided URL.
-            JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            Log.d(TAG, "MSI based location shared. Response is: " + response);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "MSI based location sharing: That didn't work!" + error.toString());
-                }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    HashMap<String, String> params = new HashMap<String, String>();
-                    params.put("Cookie", "connect.sid=" + AuthUtils.token);
-
-                    return params;
-                }
-            };
-
-            VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
         }
+
+
+        // define url
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                "/users/me/location/";
+
+        // Request a string response from the provided URL.
+        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Location shared. Response is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Location sharing: That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+
+        VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
+
+    }
+
+
+    public String getPinpointedFloor() {
+        return pinpointedFloor;
+    }
+
+    public void setPinpointedFloor(String pinpointedFloor) {
+        this.pinpointedFloor = pinpointedFloor;
+    }
+
+    public String getPinpointedBuildingName() {
+        return pinpointedBuildingName;
+    }
+
+    public void setPinpointedBuildingName(String pinpointedBuildingName) {
+        this.pinpointedBuildingName = pinpointedBuildingName;
     }
 
 }

@@ -4,12 +4,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,18 +36,15 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.toString();
-
+    // MSI based flood names for different buildings
+    String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
+    String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss", "2. Obergeschoss", "3. " +
+            "Obergeschoss", "4. Obergeschoss"};
     // hold data about open building
     private String buildingName = null;
     private LatLng buildingCenter = null;
     private String[] buildingFloorNames;
     private int numberOfFloors;
-
-    // MSI based flood names for different buildings
-    String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
-    String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss", "2. Obergeschoss", "3. " +
-            "Obergeschoss", "4. Obergeschoss"};
-
     // map and marker data
     private TextView currentFloorText;
     private GoogleMap mMap;
@@ -135,46 +132,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      * @param view
      */
-    public void sharePosition(View view) {
+    public void pinpointLocation(View view) {
 
-        Log.d(TAG, "Floor: " + currentFloor + " Marker position is: " + marker.getPosition());
+        Log.d(TAG, "Building: " + buildingName + " Floor: " + buildingFloorNames[currentFloor] +
+                " Marker position is: " + marker.getPosition());
 
-        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
-                "/users/me/location/";
+        CheckBox pinpointLocationCheckbox = (CheckBox) findViewById(R.id
+                .pinpoint_location_checkbox);
 
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("userLon", marker.getPosition().longitude);
-            jsonObject.put("userLat", marker.getPosition().latitude);
-            jsonObject.put("userBuilding", buildingName);
-            jsonObject.put("userFloor", buildingFloorNames[currentFloor]);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (pinpointLocationCheckbox.isChecked()) {
+            LocationSharingSingleton.getInstance().setPinpointedCoordinates(marker.getPosition());
+            LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
+            LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames[currentFloor]);
+        } else {
+            LocationSharingSingleton.getInstance().setPinpointedCoordinates(null);
+            LocationSharingSingleton.getInstance().setPinpointedBuildingName(null);
+            LocationSharingSingleton.getInstance().setPinpointedFloor(null);
         }
-
-        // Request a string response from the provided URL.
-        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Location shared. Response is: " + response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Location sharing: That didn't work!" + error.toString());
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> params = new HashMap<String, String>();
-                params.put("Cookie", "connect.sid=" + AuthUtils.token);
-
-                return params;
-            }
-        };
-
-        VolleyQueueSingleton.getInstance(getApplicationContext()).addToRequestQueue(putRequest);
 
     }
 

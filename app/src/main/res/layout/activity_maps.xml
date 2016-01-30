@@ -5,7 +5,8 @@
     tools:context="de.tu_berlin.indoornavigation.MapsActivity"
     android:name="com.google.android.gms.maps.SupportMapFragment" >
 
-    <Button
+    <CheckBox
+        android:id="@+id/pinpoint_location_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right|top"
@@ -13,7 +14,7 @@
         android:padding="10dp"
         android:layout_marginTop="20dp"
         android:paddingRight="10dp"
-        android:onClick="sharePosition" />
+        android:onClick="pinpointLocation" />
 
     <Button
         android:layout_width="wrap_content"
