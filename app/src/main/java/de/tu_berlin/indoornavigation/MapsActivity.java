@@ -119,6 +119,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(LatLng latLng) {
                 marker.setPosition(latLng);
+
+                CheckBox pinpointLocationCheckbox = (CheckBox) findViewById(R.id
+                        .pinpoint_location_checkbox);
+
+                if (pinpointLocationCheckbox.isChecked()) {
+                    LocationSharingSingleton.getInstance().setPinpointedCoordinates(marker.getPosition());
+                    LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
+                    LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames
+                            .get(currentFloor));
+                }
+
             }
         });
 
@@ -184,7 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // backend url
         String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
-                "/hotspots/569d8330f1de13a2884338be/active_friends/"; //TODO: change hotspot id
+                "/hotspots/6ace7b9015209eb1c2e871c/active_friends/"; // TODO: change
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
