@@ -111,6 +111,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // add marker in buildingCenter of mensa and move camera there
         marker = mMap.addMarker(new MarkerOptions().position(buildingCenter).title(buildingName));
+        marker.setVisible(false);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(buildingCenter, 22));
 
         // on map click change position of marker
@@ -169,10 +170,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
             LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames
                     .get(currentFloor));
+            marker.setVisible(true);
         } else {
             LocationSharingSingleton.getInstance().setPinpointedCoordinates(null);
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(null);
             LocationSharingSingleton.getInstance().setPinpointedFloor(null);
+            marker.setVisible(false);
         }
 
     }
