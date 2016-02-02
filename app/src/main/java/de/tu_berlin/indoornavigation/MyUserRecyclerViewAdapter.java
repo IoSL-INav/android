@@ -18,10 +18,13 @@ public class MyUserRecyclerViewAdapter extends RecyclerView.Adapter<MyUserRecycl
 
     private final List<User> mValues;
     private final UserFragment.OnListFragmentInteractionListener mListener;
+    private final String groupId;
 
-    public MyUserRecyclerViewAdapter(List<User> items, UserFragment.OnListFragmentInteractionListener listener) {
+    public MyUserRecyclerViewAdapter(String groupId, List<User> items, UserFragment
+            .OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
+        this.groupId = groupId;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class MyUserRecyclerViewAdapter extends RecyclerView.Adapter<MyUserRecycl
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onListFragmentInteraction(groupId, holder.mItem);
                 }
             }
         });

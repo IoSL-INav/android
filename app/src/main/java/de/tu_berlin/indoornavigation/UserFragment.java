@@ -65,7 +65,8 @@ public class UserFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             UsersActivity usersActivity = (UsersActivity) getActivity();
-            recyclerView.setAdapter(new MyUserRecyclerViewAdapter(usersActivity.getMembers(), mListener));
+            recyclerView.setAdapter(new MyUserRecyclerViewAdapter(usersActivity.getGroupId(),
+                    usersActivity.getMembers(), mListener));
         }
         return view;
     }
@@ -100,6 +101,6 @@ public class UserFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(User user);
+        void onListFragmentInteraction(String groupId, User user);
     }
 }

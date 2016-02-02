@@ -20,6 +20,7 @@ public class GroupsActivity extends AppCompatActivity implements GroupFragment.O
 
         Intent intent = new Intent(this, UsersActivity.class);
         intent.putExtra("members", group.getMembers());
+        intent.putExtra("groupId", group.getId());
         startActivity(intent);
     }
 
