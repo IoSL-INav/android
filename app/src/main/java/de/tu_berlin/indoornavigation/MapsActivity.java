@@ -38,7 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final String TAG = MapsActivity.class.toString();
     // MSI based flood names for different buildings
-    private String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2.  OG"};
+    private String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
     private String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss",
             "2. Obergeschoss", "3. Obergeschoss", "4. Obergeschoss"};
     // hold data about open building
