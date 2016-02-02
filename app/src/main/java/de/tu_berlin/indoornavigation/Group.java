@@ -9,9 +9,9 @@ public class Group {
     public boolean autoPing;
     private String id;
     private String name;
-    private LinkedList<String> members;
+    private LinkedList<User> members;
 
-    public Group(String id, String name, boolean autoPing, LinkedList<String> members) {
+    public Group(String id, String name, boolean autoPing, LinkedList<User> members) {
         this.id = id;
         this.name = name;
         this.autoPing = autoPing;
@@ -42,11 +42,11 @@ public class Group {
         this.autoPing = autoPing;
     }
 
-    public LinkedList<String> getMembers() {
+    public LinkedList<User> getMembers() {
         return members;
     }
 
-    public void setMembers(LinkedList<String> members) {
+    public void setMembers(LinkedList<User> members) {
         this.members = members;
     }
 }
