@@ -67,6 +67,8 @@
         </activity>
         <activity android:name=".UsersActivity">
         </activity>
+        <activity android:name=".CompanionRequestsActivity">
+        </activity>
     </application>
 
 </manifest>

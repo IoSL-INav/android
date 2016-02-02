@@ -22,7 +22,8 @@ public class UsersGroupsDataSingleton {
 
     private static final String TAG = UsersGroupsDataSingleton.class.toString();
     private static UsersGroupsDataSingleton mInstance;
-    private static LinkedList<Group> groups;
+    private LinkedList<Group> groups;
+    private LinkedList<CompanionRequest> companionRequests;
 
     public UsersGroupsDataSingleton() {
         this.groups = new LinkedList<>();
@@ -36,12 +37,20 @@ public class UsersGroupsDataSingleton {
         return mInstance;
     }
 
-    public static LinkedList<Group> getGroups() {
+    public LinkedList<Group> getGroups() {
         return groups;
     }
 
     public void setGroups(LinkedList<Group> groups) {
-        UsersGroupsDataSingleton.groups = groups;
+        this.groups = groups;
+    }
+
+    public LinkedList<CompanionRequest> getCompanionRequests() {
+        return companionRequests;
+    }
+
+    public void setCompanionRequests(LinkedList<CompanionRequest> companionRequests) {
+        this.companionRequests = companionRequests;
     }
 
     /**
@@ -102,4 +111,56 @@ public class UsersGroupsDataSingleton {
 
         VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(stringRequest);
     }
+
+    public void refreshCompanionRequestsInfo() {
+
+        // get companion requests
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() + "/companionrequests";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String responseStr) {
+                        Log.d(TAG, "Companion requests. Response is: " + responseStr);
+
+                        try {
+                            JSONArray responseArr = new JSONArray(responseStr);
+
+                            LinkedList<CompanionRequest> companionRequests = new LinkedList<>();
+                            for (int i = 0; i < responseArr.length(); i++) {
+                                JSONObject obj = responseArr.getJSONObject(i);
+                                String id = obj.getString("_id");
+                                JSONObject from = obj.getJSONObject("from");
+
+                                String fromId = from.getString("_id");
+                                String fromUsername = from.getString("name");
+
+                                companionRequests.add(new CompanionRequest(id, new User(fromId,
+                                        fromUsername, null, null, null)));
+                            }
+                            setCompanionRequests(companionRequests);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Companion requests. That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+
+        VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(stringRequest);
+
+    }
+
 }

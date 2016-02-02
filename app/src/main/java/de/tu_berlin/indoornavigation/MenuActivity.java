@@ -50,6 +50,9 @@ public class MenuActivity extends AppCompatActivity {
         // request location and bluetooth access
         SystemRequirementsChecker.checkWithDefaultDialogs(this);
 
+        // refresh companion requests
+        UsersGroupsDataSingleton.getInstance().refreshCompanionRequestsInfo();
+
     }
 
     @Override
@@ -225,6 +228,11 @@ public class MenuActivity extends AppCompatActivity {
 
         builder.show();
 
+    }
+
+    public void showCompanionRequestsActivity(MenuItem menuItem) {
+        Intent intent = new Intent(this, CompanionRequestsActivity.class);
+        startActivity(intent);
     }
 
 }
