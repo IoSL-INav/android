@@ -63,6 +63,8 @@
             android:label="@string/title_activity_menu"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity android:name=".GroupsActivity">
+        </activity>
     </application>
 
 </manifest>

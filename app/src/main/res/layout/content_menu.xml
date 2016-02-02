@@ -51,4 +51,13 @@
         android:layout_below="@+id/maps_button"
         android:layout_centerHorizontal="true"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Groups"
+        android:id="@+id/groups_button"
+        android:onClick="showGroupsLibrary"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>

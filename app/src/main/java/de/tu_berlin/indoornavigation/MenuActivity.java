@@ -27,6 +27,9 @@ public class MenuActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // initialize hotspots and groups data
+        LocationSharingSingleton.getInstance().refreshBeaconsInHotspots();
+        UsersGroupsDataSingleton.getInstance().refreshGroupsInfo();
     }
 
     /**
@@ -46,6 +49,15 @@ public class MenuActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("id", "library");
+        startActivity(intent);
+    }
+
+    /**
+     * Starts groups activity
+     */
+    public void showGroupsLibrary(View view) {
+
+        Intent intent = new Intent(this, GroupsActivity.class);
         startActivity(intent);
     }
 
