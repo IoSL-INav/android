@@ -38,9 +38,8 @@ public class MenuActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // initialize hotspots and groups data
+        // initialize hotspots
         LocationSharingSingleton.getInstance().refreshBeaconsInHotspots();
-        UsersGroupsDataSingleton.getInstance().refreshGroupsInfo();
     }
 
     @Override
@@ -50,8 +49,9 @@ public class MenuActivity extends AppCompatActivity {
         // request location and bluetooth access
         SystemRequirementsChecker.checkWithDefaultDialogs(this);
 
-        // refresh companion requests
+        // refresh companion requests and groups
         UsersGroupsDataSingleton.getInstance().refreshCompanionRequestsInfo();
+        UsersGroupsDataSingleton.getInstance().refreshGroupsInfo();
 
     }
 
