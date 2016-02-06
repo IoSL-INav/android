@@ -26,6 +26,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import de.tu_berlin.indoornavigation.entities.Beacon;
+import de.tu_berlin.indoornavigation.singletons.LocationSharingSingleton;
+import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
+
 /**
  * Created by Jan on 30. 11. 2015.
  */

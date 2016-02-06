@@ -34,6 +34,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import de.tu_berlin.indoornavigation.singletons.LocationSharingSingleton;
+import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.toString();

@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.tu_berlin.indoornavigation.entities.CompanionRequest;
+
 /**
  * {@link RecyclerView.Adapter} that can display a {@link CompanionRequest} and makes a call to the
  * specified {@link CompanionRequestFragment.OnListFragmentInteractionListener}.

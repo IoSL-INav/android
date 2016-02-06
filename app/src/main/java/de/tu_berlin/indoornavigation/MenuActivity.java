@@ -27,6 +27,12 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.tu_berlin.indoornavigation.singletons.LocationSharingSingleton;
+import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.UsersGroupsDataSingleton;
+import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+
 public class MenuActivity extends AppCompatActivity {
 
     private static final String TAG = MenuActivity.class.toString();

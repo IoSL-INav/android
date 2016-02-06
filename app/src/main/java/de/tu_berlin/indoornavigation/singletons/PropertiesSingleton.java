@@ -1,8 +1,10 @@
-package de.tu_berlin.indoornavigation;
+package de.tu_berlin.indoornavigation.singletons;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import de.tu_berlin.indoornavigation.IndoorNavigation;
 
 /**
  * Created by Jan on 1. 12. 2015.

@@ -1,4 +1,4 @@
-package de.tu_berlin.indoornavigation;
+package de.tu_berlin.indoornavigation.entities;
 
 import java.util.LinkedList;
 

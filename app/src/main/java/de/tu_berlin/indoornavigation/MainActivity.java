@@ -18,6 +18,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.toString();

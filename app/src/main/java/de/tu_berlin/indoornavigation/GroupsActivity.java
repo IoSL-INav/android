@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import de.tu_berlin.indoornavigation.entities.Group;
+
 public class GroupsActivity extends AppCompatActivity implements GroupFragment.OnListFragmentInteractionListener {
 
     private static final String TAG = GroupsActivity.class.toString();

@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.tu_berlin.indoornavigation.entities.User;
+import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+
 public class UsersActivity extends AppCompatActivity implements UserFragment.OnListFragmentInteractionListener {
 
     private static final String TAG = UsersActivity.class.toString();

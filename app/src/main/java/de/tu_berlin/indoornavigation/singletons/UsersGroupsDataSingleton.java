@@ -1,4 +1,4 @@
-package de.tu_berlin.indoornavigation;
+package de.tu_berlin.indoornavigation.singletons;
 
 import android.util.Log;
 
@@ -14,6 +14,12 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+import de.tu_berlin.indoornavigation.IndoorNavigation;
+import de.tu_berlin.indoornavigation.entities.CompanionRequest;
+import de.tu_berlin.indoornavigation.entities.Group;
+import de.tu_berlin.indoornavigation.entities.User;
 
 /**
  * Created by Jan on 28. 01. 2016.

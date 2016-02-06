@@ -8,6 +8,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.tu_berlin.indoornavigation.entities.User;
+
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link User} and makes a call to the

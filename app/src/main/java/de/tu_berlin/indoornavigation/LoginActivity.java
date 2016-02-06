@@ -11,6 +11,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
+import de.tu_berlin.indoornavigation.utils.CookieUtils;
+
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = LoginActivity.class.toString();

@@ -10,6 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import de.tu_berlin.indoornavigation.entities.CompanionRequest;
+import de.tu_berlin.indoornavigation.singletons.UsersGroupsDataSingleton;
+
 /**
  * A fragment representing a list of Items.
  * <p/>

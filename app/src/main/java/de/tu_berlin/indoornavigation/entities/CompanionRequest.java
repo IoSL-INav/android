@@ -1,4 +1,4 @@
-package de.tu_berlin.indoornavigation;
+package de.tu_berlin.indoornavigation.entities;
 
 /**
  * Created by Jan on 2. 02. 2016.

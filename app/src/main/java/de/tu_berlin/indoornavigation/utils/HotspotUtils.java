@@ -1,4 +1,4 @@
-package de.tu_berlin.indoornavigation;
+package de.tu_berlin.indoornavigation.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
