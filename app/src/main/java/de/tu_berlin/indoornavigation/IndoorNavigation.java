@@ -45,12 +45,29 @@ public class IndoorNavigation extends Application {
     private static final Region ALL_ESTIMOTE_BEACONS = new Region("rid", ESTIMOTE_PROXIMITY_UUID,
             null, null);
     private static Context mContext;
-    private BeaconManager beaconManager;
+    private static BeaconManager beaconManager;
+    private static String nearableScanId;
+    private static ScheduledExecutorService scheduler;
 
+    // getters and setters
     public static Context getContext() {
         return mContext;
     }
 
+    /**
+     * Method stops all estimote services and MSI scanning service.
+     */
+    public static void stopBeaconAndNearableDiscoveryAndMSIScanning() {
+
+        if (beaconManager != null) {
+            Log.d(TAG, "Stopping beacon and nearable scanning.");
+            beaconManager.stopRanging(ALL_ESTIMOTE_BEACONS);
+            beaconManager.stopNearableDiscovery(nearableScanId);
+            beaconManager.disconnect();
+        }
+        scheduler.shutdown();
+
+    }
 
     @Override
     public void onCreate() {
@@ -118,13 +135,13 @@ public class IndoorNavigation extends Application {
                     beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
 
                     // Nearable discovery.
-                    beaconManager.startNearableDiscovery();
+                    nearableScanId = beaconManager.startNearableDiscovery();
                 }
             });
         }
 
         // create service to monitor MSI API
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate
                 (new Runnable() {
                     public void run() {

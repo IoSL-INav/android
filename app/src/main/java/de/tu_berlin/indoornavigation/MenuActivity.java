@@ -164,7 +164,17 @@ public class MenuActivity extends AppCompatActivity {
      */
     public void exit(View view) {
 
+        IndoorNavigation.stopBeaconAndNearableDiscoveryAndMSIScanning();
+
         finish();
+
+        // wait for beacon manager to stop scanning
+        // without wait here, estimote services don't get stopped
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.exit(0);
     }
 
