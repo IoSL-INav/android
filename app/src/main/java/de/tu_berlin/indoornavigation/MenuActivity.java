@@ -171,7 +171,7 @@ public class MenuActivity extends AppCompatActivity {
     public void showAddFriendDialog(MenuItem item) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Title");
+        builder.setTitle("Enter email address.");
 
         // Set up the input
         final EditText input = new EditText(this);
@@ -193,7 +193,7 @@ public class MenuActivity extends AppCompatActivity {
 
                 JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("userEmail", email); // TODO: remove
+                    jsonObject.put("userEmail", email);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

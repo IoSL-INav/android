@@ -19,6 +19,7 @@ import java.util.Map;
 
 import de.tu_berlin.indoornavigation.entities.User;
 import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.UsersGroupsDataSingleton;
 import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
 import de.tu_berlin.indoornavigation.utils.AuthUtils;
 
@@ -36,10 +37,10 @@ public class UsersActivity extends AppCompatActivity implements UserFragment.OnL
         Log.d(TAG, groupId + " " + user.getUsername());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Title");
+        builder.setTitle("Delete user?");
 
         // Set up the buttons
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -55,6 +56,7 @@ public class UsersActivity extends AppCompatActivity implements UserFragment.OnL
                             @Override
                             public void onResponse(JSONObject response) {
                                 Log.d(TAG, "Remove friend. Response is: " + response);
+                                UsersGroupsDataSingleton.getInstance().refreshGroupsInfo();
                             }
                         }, new Response.ErrorListener() {
                     @Override

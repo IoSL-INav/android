@@ -19,6 +19,7 @@ import java.util.Map;
 
 import de.tu_berlin.indoornavigation.entities.CompanionRequest;
 import de.tu_berlin.indoornavigation.singletons.PropertiesSingleton;
+import de.tu_berlin.indoornavigation.singletons.UsersGroupsDataSingleton;
 import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
 import de.tu_berlin.indoornavigation.utils.AuthUtils;
 
@@ -36,7 +37,7 @@ public class CompanionRequestsActivity extends AppCompatActivity implements
     public void onListFragmentInteraction(final CompanionRequest companionRequest) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Title");
+        builder.setTitle("Accept companion request?");
 
         // Set up the buttons
         builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
@@ -60,6 +61,8 @@ public class CompanionRequestsActivity extends AppCompatActivity implements
                             @Override
                             public void onResponse(JSONObject response) {
                                 Log.d(TAG, "Companion request accepted. Response is: " + response);
+                                UsersGroupsDataSingleton.getInstance().refreshCompanionRequestsInfo();
+
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -81,7 +84,7 @@ public class CompanionRequestsActivity extends AppCompatActivity implements
 
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -102,6 +105,7 @@ public class CompanionRequestsActivity extends AppCompatActivity implements
                             @Override
                             public void onResponse(JSONObject response) {
                                 Log.d(TAG, "Companion request canceled. Response is: " + response);
+                                UsersGroupsDataSingleton.getInstance().refreshCompanionRequestsInfo();
                             }
                         }, new Response.ErrorListener() {
                     @Override
