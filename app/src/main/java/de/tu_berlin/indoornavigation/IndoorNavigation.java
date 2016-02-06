@@ -34,6 +34,8 @@ import de.tu_berlin.indoornavigation.singletons.VolleyQueueSingleton;
 
 /**
  * Created by Jan on 30. 11. 2015.
+ * <p/>
+ * Class extends application. Initializes services.
  */
 public class IndoorNavigation extends Application {
 
@@ -61,7 +63,9 @@ public class IndoorNavigation extends Application {
         if (BluetoothAdapter.getDefaultAdapter() != null) {
             // initialise beacon manager
             beaconManager = new BeaconManager(getApplicationContext());
-            beaconManager.setForegroundScanPeriod(5000, 5000); // TODO: set appropriate time
+            beaconManager.setForegroundScanPeriod(5000, 5000);
+
+            // set nearable listener
             beaconManager.setNearableListener(new BeaconManager.NearableListener() {
                 @Override
                 public void onNearablesDiscovered(List<Nearable> list) {
@@ -81,6 +85,7 @@ public class IndoorNavigation extends Application {
                 }
             });
 
+            // set beacon listener
             beaconManager.setRangingListener(new BeaconManager.RangingListener() {
                 @Override
                 public void onBeaconsDiscovered(Region region, final List beacons) {
@@ -92,7 +97,7 @@ public class IndoorNavigation extends Application {
                     // clear detected beacons
                     LocationSharingSingleton.getInstance().getDetectedBeacons().clear();
 
-
+                    // add newly detected beacons
                     for (com.estimote.sdk.Beacon beacon : beaconss) {
                         Log.d(TAG, beacon.toString());
 
@@ -104,6 +109,7 @@ public class IndoorNavigation extends Application {
                 }
             });
 
+            // run estimote beacon and nearable scanning services
             beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
                 @Override
                 public void onServiceReady() {
@@ -131,6 +137,7 @@ public class IndoorNavigation extends Application {
                         Log.d(TAG, "Current SSID: " + wifiManager.getConnectionInfo().getSSID()
                                 .toString());
 
+                        // if phone is connected to eduroam, scan MSI API URL
                         if (wifiManager.getConnectionInfo().getSSID().equals("\"eduroam\"")) {
 
                             String url = PropertiesSingleton.getInstance().getMsiUrl();
@@ -143,6 +150,7 @@ public class IndoorNavigation extends Application {
 
                                             Log.d(TAG, "MSI response: " + response);
 
+                                            // parse response, get building name and floor
                                             String[] buildingNameFloor = parseMsiApiResponse
                                                     (response);
 
@@ -168,7 +176,7 @@ public class IndoorNavigation extends Application {
                     }
                 }, 0, 30, TimeUnit.SECONDS);
 
-        // update location
+        // create service to automatically update location
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

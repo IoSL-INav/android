@@ -33,6 +33,12 @@ public class UsersActivity extends AppCompatActivity implements UserFragment.OnL
         setContentView(R.layout.activity_users);
     }
 
+    /**
+     * Show dialog for removing user from group.
+     *
+     * @param groupId
+     * @param user
+     */
     public void onListFragmentInteraction(final String groupId, final User user) {
         Log.d(TAG, groupId + " " + user.getUsername());
 
@@ -87,10 +93,20 @@ public class UsersActivity extends AppCompatActivity implements UserFragment.OnL
         builder.show();
     }
 
+    /**
+     * Get members from intent extras.
+     *
+     * @return
+     */
     public ArrayList<User> getMembers() {
         return (ArrayList<User>) getIntent().getExtras().get("members");
     }
 
+    /**
+     * Get group id from intent extras.
+     *
+     * @return
+     */
     public String getGroupId() {
         return getIntent().getStringExtra("groupId");
     }

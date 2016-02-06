@@ -2,6 +2,8 @@ package de.tu_berlin.indoornavigation.entities;
 
 /**
  * Created by Jan on 2. 02. 2016.
+ * <p/>
+ * Entity represents companion requests.
  */
 public class CompanionRequest {
 

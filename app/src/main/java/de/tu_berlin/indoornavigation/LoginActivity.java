@@ -20,7 +20,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String URL = "http://piazza.snet.tu-berlin.de/login/";
 
     /**
-     * Opens web view with TU Berlin login form. After successful redirection (TODO: checks url)
+     * Opens web view with TU Berlin login form. After successful redirection
      * saves authentication token from cookie to Shared Preferences, close this activity
      * and open Main Activity.
      */
@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         WebView webview = new WebView(this);
         setContentView(webview);
 
-        // set basic webview settings
+        // set basic web view settings
         webview.setFocusable(true);
         webview.setFocusableInTouchMode(true);
         webview.getSettings().setJavaScriptEnabled(true);

@@ -2,41 +2,52 @@ package de.tu_berlin.indoornavigation.entities;
 
 /**
  * Created by Jan on 19. 01. 2016.
+ * <p/>
+ * Entity Beacon that could represent estimote Beacon or Nearable.
  */
 public class Beacon {
 
-    private String companyUUID;
+    // Beacon or Nearable identifiers
+    private String proximityUUID;
     private int major;
     private int minor;
+    // signal strength
     private int rssi;
+    // name for development and testing (e.g. blueBeacon, car, door...)
     private String name;
 
-    public Beacon(String companyUUID, int major, int minor) {
-        this.companyUUID = companyUUID;
+    public Beacon(String proximityUUID, int major, int minor) {
+        this.proximityUUID = proximityUUID;
         this.major = major;
         this.minor = minor;
     }
 
-    public Beacon(String companyUUID, int major, int minor, int rssi) {
-        this.companyUUID = companyUUID;
+    public Beacon(String proximityUUID, int major, int minor, int rssi) {
+        this.proximityUUID = proximityUUID;
         this.major = major;
         this.minor = minor;
         this.rssi = rssi;
     }
 
-    public Beacon(String name, String companyUUID, int major, int minor) {
+    public Beacon(String name, String proximityUUID, int major, int minor) {
         this.name = name;
-        this.companyUUID = companyUUID;
+        this.proximityUUID = proximityUUID;
         this.major = major;
         this.minor = minor;
     }
 
+    /**
+     * Two Beacons are equal, if they have the same identifiers proximityUUID, major and minor
+     *
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
 
         Beacon object = (Beacon) o;
 
-        if (this.companyUUID.toLowerCase().equals(object.companyUUID.toLowerCase()) && this.major == object
+        if (this.proximityUUID.toLowerCase().equals(object.proximityUUID.toLowerCase()) && this.major == object
                 .getMajor() && this.minor == object.getMinor()) {
             return true;
         }
@@ -49,12 +60,12 @@ public class Beacon {
         return this.minor * this.major;
     }
 
-    public String getCompanyUUID() {
-        return companyUUID;
+    public String getProximityUUID() {
+        return proximityUUID;
     }
 
-    public void setCompanyUUID(String companyUUID) {
-        this.companyUUID = companyUUID;
+    public void setProximityUUID(String proximityUUID) {
+        this.proximityUUID = proximityUUID;
     }
 
     public int getMajor() {
@@ -90,7 +101,7 @@ public class Beacon {
     }
 
     public String toString() {
-        return "Name: " + this.name + " UUID: " + this.companyUUID + " major: " + this.major + "" +
+        return "Name: " + this.name + " UUID: " + this.proximityUUID + " major: " + this.major + "" +
                 " " + "minor: " + this.minor + " rssi: " + this.rssi;
     }
 }

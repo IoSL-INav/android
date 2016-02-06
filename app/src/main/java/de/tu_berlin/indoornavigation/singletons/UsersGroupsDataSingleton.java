@@ -15,19 +15,22 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import de.tu_berlin.indoornavigation.utils.AuthUtils;
 import de.tu_berlin.indoornavigation.IndoorNavigation;
 import de.tu_berlin.indoornavigation.entities.CompanionRequest;
 import de.tu_berlin.indoornavigation.entities.Group;
 import de.tu_berlin.indoornavigation.entities.User;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
 
 /**
  * Created by Jan on 28. 01. 2016.
+ * <p/>
+ * Singleton query backend and stores data about users, groups and companion requests.
  */
 public class UsersGroupsDataSingleton {
 
     private static final String TAG = UsersGroupsDataSingleton.class.toString();
     private static UsersGroupsDataSingleton mInstance;
+
     private LinkedList<Group> groups;
     private LinkedList<CompanionRequest> companionRequests;
 
@@ -36,6 +39,11 @@ public class UsersGroupsDataSingleton {
         refreshGroupsInfo();
     }
 
+    /**
+     * Get singleton instance.
+     *
+     * @return
+     */
     public static synchronized UsersGroupsDataSingleton getInstance() {
         if (mInstance == null) {
             mInstance = new UsersGroupsDataSingleton();
@@ -43,24 +51,8 @@ public class UsersGroupsDataSingleton {
         return mInstance;
     }
 
-    public LinkedList<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(LinkedList<Group> groups) {
-        this.groups = groups;
-    }
-
-    public LinkedList<CompanionRequest> getCompanionRequests() {
-        return companionRequests;
-    }
-
-    public void setCompanionRequests(LinkedList<CompanionRequest> companionRequests) {
-        this.companionRequests = companionRequests;
-    }
-
     /**
-     * Query data about groups
+     * Query data about groups.
      */
     public void refreshGroupsInfo() {
         // get groups
@@ -71,7 +63,7 @@ public class UsersGroupsDataSingleton {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String responseStr) {
-                        Log.d(TAG, "Response is: " + responseStr);
+                        Log.d(TAG, "Querying groups. Response is: " + responseStr);
 
                         try {
                             JSONArray responseArr = new JSONArray(responseStr);
@@ -92,6 +84,7 @@ public class UsersGroupsDataSingleton {
                                     String userUsername = membersJson.getJSONObject(j).getString
                                             ("name");
                                     members.add(new User(userId, userUsername, null, null, null));
+                                    // TODO: parse other user data, when available
                                 }
                                 groups.add(new Group(id, name, autoPing, members));
                             }
@@ -103,7 +96,7 @@ public class UsersGroupsDataSingleton {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "That didn't work!" + error.toString());
+                Log.e(TAG, "Querying groups. That didn't work!" + error.toString());
             }
         }) {
             @Override
@@ -167,6 +160,23 @@ public class UsersGroupsDataSingleton {
 
         VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(stringRequest);
 
+    }
+
+    // getters and setters
+    public LinkedList<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(LinkedList<Group> groups) {
+        this.groups = groups;
+    }
+
+    public LinkedList<CompanionRequest> getCompanionRequests() {
+        return companionRequests;
+    }
+
+    public void setCompanionRequests(LinkedList<CompanionRequest> companionRequests) {
+        this.companionRequests = companionRequests;
     }
 
 }

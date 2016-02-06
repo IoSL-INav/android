@@ -42,7 +42,7 @@ import de.tu_berlin.indoornavigation.utils.AuthUtils;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.toString();
-    // MSI based flood names for different buildings
+    // MSI based floor names for different buildings
     private String[] mensaFloorNames = {"Mensa 1. OG", "Mensa 2. OG"};
     private String[] libraryFloorNames = {"Erdgeschoss", "1. Obergeschoss",
             "2. Obergeschoss", "3. Obergeschoss", "4. Obergeschoss"};
@@ -51,10 +51,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng buildingCenter = null;
     private LinkedList<String> buildingFloorNames;
     private int numberOfFloors;
-    // map and marker data
+    // map and myPositionMarker data
     private TextView currentFloorText;
     private GoogleMap mMap;
-    private Marker marker;
+    private Marker myPositionMarker;
     private ArrayList<GroundOverlay> overlays = new ArrayList<>();
     private int currentFloor = 0;
     private LinkedList<MarkerOptions>[] friendsMarkerOptions;
@@ -79,8 +79,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -89,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        // based on intent extras, open mensa or library map
         if (getIntent().getExtras().getString("id").equals("mensa")) {
             buildingCenter = new LatLng(52.50969128322999, 13.326051905751228);
             buildingName = "Mensa";
@@ -114,23 +113,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // show friends
         showFriends(null);
 
-        // add marker in buildingCenter of mensa and move camera there
-        marker = mMap.addMarker(new MarkerOptions().position(buildingCenter).title(buildingName));
-        marker.setVisible(false);
+        // add myPositionMarker in buildingCenter and move camera there
+        myPositionMarker = mMap.addMarker(new MarkerOptions().position(buildingCenter).title(buildingName));
+        myPositionMarker.setVisible(false);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(buildingCenter, 22));
 
-        // on map click change position of marker
+        // On map click change position of myPositionMarker. If sharing position is enabled,
+        // store my position into LocationSharingSingleton
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
             @Override
             public void onMapClick(LatLng latLng) {
-                marker.setPosition(latLng);
+                myPositionMarker.setPosition(latLng);
 
                 CheckBox pinpointLocationCheckbox = (CheckBox) findViewById(R.id
                         .pinpoint_location_checkbox);
 
                 if (pinpointLocationCheckbox.isChecked()) {
-                    LocationSharingSingleton.getInstance().setPinpointedCoordinates(marker.getPosition());
+                    LocationSharingSingleton.getInstance().setPinpointedCoordinates(myPositionMarker.getPosition());
                     LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
                     LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames
                             .get(currentFloor));
@@ -158,29 +158,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * On button clicked, shares position of marker to the backend
+     * Enables or disables position pinpointing.
      *
      * @param view
      */
     public void pinpointLocation(View view) {
 
         Log.d(TAG, "Building: " + buildingName + " Floor: " + buildingFloorNames.get(currentFloor) +
-                " Marker position is: " + marker.getPosition());
+                " Marker position is: " + myPositionMarker.getPosition());
 
         CheckBox pinpointLocationCheckbox = (CheckBox) findViewById(R.id
                 .pinpoint_location_checkbox);
 
         if (pinpointLocationCheckbox.isChecked()) {
-            LocationSharingSingleton.getInstance().setPinpointedCoordinates(marker.getPosition());
+            LocationSharingSingleton.getInstance().setPinpointedCoordinates(myPositionMarker.getPosition());
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(buildingName);
             LocationSharingSingleton.getInstance().setPinpointedFloor(buildingFloorNames
                     .get(currentFloor));
-            marker.setVisible(true);
+            myPositionMarker.setVisible(true);
         } else {
             LocationSharingSingleton.getInstance().setPinpointedCoordinates(null);
             LocationSharingSingleton.getInstance().setPinpointedBuildingName(null);
             LocationSharingSingleton.getInstance().setPinpointedFloor(null);
-            marker.setVisible(false);
+            myPositionMarker.setVisible(false);
         }
 
     }
@@ -245,13 +245,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         + " " + accuracyIndicator + " building: " + buildingName
                                         + " floor: " + buildingFloor);
 
-                                // add marker options and circle options
+                                // add myPositionMarker options and circle options
                                 LatLng position = new LatLng(lat, lng);
                                 int strokeColor = 0xffff0000; //red outline
                                 int shadeColor = 0x44ff0000; //opaque red fill
 
                                 int floorIndex = buildingFloorNames.indexOf(buildingFloor);
-                                if (floorIndex != -1) { //TODO: test
+                                if (floorIndex != -1) {
                                     friendsMarkerOptions[floorIndex].add
                                             (new
                                                     MarkerOptions().position
@@ -278,7 +278,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "That didn't work!" + error.toString());
+                Log.e(TAG, "Looking for friends. That didn't work!" + error.toString());
             }
         }) {
             @Override
@@ -294,6 +294,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    /**
+     * Change floor, one floor up.
+     *
+     * @param view
+     */
     public void changeFloorUp(View view) {
         Log.d(TAG, "Up.");
 
@@ -304,6 +309,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Change floor, one floor down.
+     *
+     * @param view
+     */
     public void changeFloorDown(View view) {
         Log.d(TAG, "Down.");
 
@@ -314,6 +324,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Show overlay of selected floor.
+     *
+     * @param floor
+     */
     private void selectFloor(int floor) {
         for (int i = 0; i < overlays.size(); i++) {
             if (i == floor) {
@@ -325,6 +340,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         drawFriendsLocations();
     }
 
+    /**
+     * Update floor name text.
+     *
+     * @param floor
+     */
     private void setCurrentFloorText(int floor) {
         if (floor == 0) {
             currentFloorText.setText("EG");
@@ -333,6 +353,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Show friends on selected floor.
+     */
     private void drawFriendsLocations() {
 
         // delete old markers

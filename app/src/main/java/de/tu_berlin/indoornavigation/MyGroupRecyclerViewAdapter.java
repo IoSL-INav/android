@@ -14,7 +14,6 @@ import de.tu_berlin.indoornavigation.entities.Group;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Group} and makes a call to the
  * specified {@link GroupFragment.OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class MyGroupRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupRecyclerViewAdapter.ViewHolder> {
 

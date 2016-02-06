@@ -126,12 +126,12 @@ public class MenuActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d(TAG, "Response is: " + response);
+                        Log.d(TAG, "Logging out. Response is: " + response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "That didn't work!" + error.toString());
+                Log.e(TAG, "Logging out. That didn't work!" + error.toString());
             }
         }) {
             @Override
@@ -168,6 +168,11 @@ public class MenuActivity extends AppCompatActivity {
         System.exit(0);
     }
 
+    /**
+     * Display dialog for adding companions.
+     *
+     * @param item
+     */
     public void showAddFriendDialog(MenuItem item) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -175,7 +180,6 @@ public class MenuActivity extends AppCompatActivity {
 
         // Set up the input
         final EditText input = new EditText(this);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
@@ -236,6 +240,11 @@ public class MenuActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Starts CompanionRequestsActivity
+     *
+     * @param menuItem
+     */
     public void showCompanionRequestsActivity(MenuItem menuItem) {
         Intent intent = new Intent(this, CompanionRequestsActivity.class);
         startActivity(intent);

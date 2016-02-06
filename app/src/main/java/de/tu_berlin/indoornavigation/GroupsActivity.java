@@ -17,6 +17,11 @@ public class GroupsActivity extends AppCompatActivity implements GroupFragment.O
         setContentView(R.layout.activity_groups);
     }
 
+    /**
+     * Open view showing users of the group.
+     *
+     * @param group
+     */
     public void onListFragmentInteraction(Group group) {
         Log.d(TAG, group.getName());
 

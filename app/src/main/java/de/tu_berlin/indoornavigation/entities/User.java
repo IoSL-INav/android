@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by Jan on 2. 02. 2016.
+ * <p/>
+ * Entity represents user.
  */
 public class User implements Serializable {
 

@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String responseStr) {
-                        Log.d(TAG, "Response is: " + responseStr);
+                        Log.d(TAG, "Checking auth token validity. Response is: " + responseStr);
                         try {
                             JSONObject response = new JSONObject(responseStr);
                             if (response.getString("status").equals("success")) {
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                //Log.e(TAG, "That didn't work!" + error.toString());
                 Log.d(TAG, "Token expired. Will redirect to login view.");
                 showLoginActivity();
             }

@@ -4,8 +4,12 @@ import java.util.LinkedList;
 
 /**
  * Created by Jan on 16. 01. 2016.
+ * <p/>
+ * Entity represents group.
  */
 public class Group {
+
+    // Should users in the group be pinged with my location
     public boolean autoPing;
     private String id;
     private String name;

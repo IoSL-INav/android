@@ -8,13 +8,21 @@ import de.tu_berlin.indoornavigation.IndoorNavigation;
 
 /**
  * Created by Jan on 1. 12. 2015.
+ * <p/>
+ * Singleton reads properties file at initialization and store read properties for further use.
  */
 public class PropertiesSingleton {
 
     private static PropertiesSingleton mInstance;
+
+    // tubIt MSI API URL
     private String msiUrl;
+    // backend server URL
     private String backendServerUrl;
 
+    /**
+     * Read properties file at initialization.
+     */
     public PropertiesSingleton() {
         Properties prop = new Properties();
         InputStream input;
@@ -30,6 +38,11 @@ public class PropertiesSingleton {
         backendServerUrl = prop.getProperty("backendServerUrl");
     }
 
+    /**
+     * Get singleton instance.
+     *
+     * @return
+     */
     public static synchronized PropertiesSingleton getInstance() {
         if (mInstance == null) {
             mInstance = new PropertiesSingleton();

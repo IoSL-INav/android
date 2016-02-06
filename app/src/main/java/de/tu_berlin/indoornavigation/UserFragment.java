@@ -20,9 +20,7 @@ import de.tu_berlin.indoornavigation.entities.User;
  */
 public class UserFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -33,8 +31,6 @@ public class UserFragment extends Fragment {
     public UserFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static UserFragment newInstance(int columnCount) {
         UserFragment fragment = new UserFragment();
         Bundle args = new Bundle();
@@ -102,7 +98,6 @@ public class UserFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(String groupId, User user);
     }
 }

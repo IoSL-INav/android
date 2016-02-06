@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Jan on 13. 11. 2015.
+ * <p/>
+ * Class for retrieving and deleting cookies.
  */
 public class CookieUtils {
 

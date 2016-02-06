@@ -17,12 +17,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import de.tu_berlin.indoornavigation.utils.AuthUtils;
 import de.tu_berlin.indoornavigation.IndoorNavigation;
 import de.tu_berlin.indoornavigation.entities.Beacon;
+import de.tu_berlin.indoornavigation.utils.AuthUtils;
 
 /**
  * Created by Jan on 19. 01. 2016.
+ * <p/>
+ * Singleton is used for storing pinpointed location, beacon detected location and MSI API detected
+ * location. Singleton also stores data about all beacons that are part of hotspots defined in
+ * backend.
  */
 public class LocationSharingSingleton {
 
@@ -50,6 +54,11 @@ public class LocationSharingSingleton {
 
     }
 
+    /**
+     * Get singleton instance.
+     *
+     * @return
+     */
     public static synchronized LocationSharingSingleton getInstance() {
         if (mInstance == null) {
             mInstance = new LocationSharingSingleton();
@@ -57,6 +66,9 @@ public class LocationSharingSingleton {
         return mInstance;
     }
 
+    /**
+     * Query backend for information about beacons in hotspots.
+     */
     public void refreshBeaconsInHotspots() {
 
         this.beaconsInHotspots.clear();
@@ -69,7 +81,7 @@ public class LocationSharingSingleton {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String responseStr) {
-                        Log.d(TAG, "Response is: " + responseStr);
+                        Log.d(TAG, "Querying hotspots. Response is: " + responseStr);
 
                         try {
                             JSONArray hotspots = new JSONArray(responseStr);
@@ -98,7 +110,7 @@ public class LocationSharingSingleton {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "That didn't work!" + error.toString());
+                Log.e(TAG, "Querying hotspots. That didn't work!" + error.toString());
             }
         }) {
             @Override
@@ -114,6 +126,11 @@ public class LocationSharingSingleton {
 
     }
 
+    /**
+     * If estimote Beacon is part of hotspot, add it in list of detected Beacons.
+     *
+     * @param beacon
+     */
     public void addDetectedBeacon(Beacon beacon) {
 
         int index = this.beaconsInHotspots.indexOf(beacon);
@@ -124,6 +141,11 @@ public class LocationSharingSingleton {
         }
     }
 
+    /**
+     * If estimote Nearable is part of hotspot, add it in list of detected Beacons.
+     *
+     * @param beacon
+     */
     public void addDetectedNearable(Beacon beacon) {
 
         int index = this.beaconsInHotspots.indexOf(beacon);
@@ -132,6 +154,132 @@ public class LocationSharingSingleton {
             beacon.setName(this.beaconsInHotspots.get(index).getName());
             this.detectedNearables.add(beacon);
         }
+    }
+
+    /**
+     * Returns list of all detected estimote Beacons and estimote Nearables.
+     *
+     * @return
+     */
+    public LinkedList<Beacon> getDetectedNearablesAndBeacons() {
+        LinkedList<Beacon> allBeaconsAndNearables = new LinkedList<>(detectedBeacons);
+        allBeaconsAndNearables.addAll(detectedNearables);
+        return allBeaconsAndNearables;
+    }
+
+    /**
+     * Find closest nearable or beacon based on signal strength.
+     *
+     * @param
+     */
+    public Beacon getClosestNearableOrBeacon() {
+
+        Beacon closestNearableOrBeacon = null;
+
+        if (!this.getDetectedNearablesAndBeacons().isEmpty()) {
+            closestNearableOrBeacon = this.getDetectedNearablesAndBeacons().getFirst();
+        }
+        for (Beacon beaconOrNearable : this.getDetectedNearablesAndBeacons()) {
+            if (beaconOrNearable.getRssi() > closestNearableOrBeacon.getRssi()) {
+                closestNearableOrBeacon = beaconOrNearable;
+            }
+        }
+
+        return closestNearableOrBeacon;
+    }
+
+    /**
+     * Updates location based on most accurate location info available.
+     */
+    public void updateLocation() {
+
+        Beacon closestBeaconOrNearable = getClosestNearableOrBeacon();
+
+        Log.d(TAG, "Updating location");
+        Log.d(TAG, "Pinpointed coordinates: " + pinpointedCoordinates + " building: " +
+                pinpointedBuildingName + " floor: " + pinpointedFloor);
+        if (closestBeaconOrNearable != null) {
+            Log.d(TAG, "Closest beacon: " + closestBeaconOrNearable.getName());
+        } else {
+            Log.d(TAG, "Closest beacon: null");
+        }
+        Log.d(TAG, "MSI building: " + MSIBuildingName + " floor: " + MSIFloor);
+
+        // json object with location
+        JSONObject jsonObject = new JSONObject();
+
+        // add the most accurate location available to json object
+        if (pinpointedCoordinates != null && pinpointedBuildingName != null && pinpointedFloor !=
+                null) { // pinpointed location available
+            try {
+                jsonObject.put("userLon", pinpointedCoordinates.longitude);
+                jsonObject.put("userLat", pinpointedCoordinates.latitude);
+                jsonObject.put("userBuilding", pinpointedBuildingName);
+                jsonObject.put("userFloor", pinpointedFloor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (closestBeaconOrNearable != null) { // detected beacon information available
+            try {
+                jsonObject.put("userMajor", closestBeaconOrNearable.getMajor());
+                jsonObject.put("userMinor", closestBeaconOrNearable.getMinor());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (getMSIBuildingName() != null && getMSIFloor() != null) { // MSI location available
+            try {
+                jsonObject.put("userBuilding", getMSIBuildingName());
+                jsonObject.put("userFloor", getMSIFloor());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // define url
+        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
+                "/users/me/location/";
+
+        // Request a string response from the provided URL.
+        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Location shared. Response is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Location sharing: That didn't work!" + error.toString());
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "connect.sid=" + AuthUtils.token);
+
+                return params;
+            }
+        };
+
+        VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
+
+    }
+
+    // Getters and setters
+    public String getPinpointedFloor() {
+        return pinpointedFloor;
+    }
+
+    public void setPinpointedFloor(String pinpointedFloor) {
+        this.pinpointedFloor = pinpointedFloor;
+    }
+
+    public String getPinpointedBuildingName() {
+        return pinpointedBuildingName;
+    }
+
+    public void setPinpointedBuildingName(String pinpointedBuildingName) {
+        this.pinpointedBuildingName = pinpointedBuildingName;
     }
 
     public LinkedList<Beacon> getBeaconsInHotspots() {
@@ -169,128 +317,4 @@ public class LocationSharingSingleton {
     public void setPinpointedCoordinates(LatLng pinpointedCoordinates) {
         this.pinpointedCoordinates = pinpointedCoordinates;
     }
-
-
-    public LinkedList<Beacon> getDetectedNearablesAndBeacons() {
-        LinkedList<Beacon> allBeaconsAndNearables = new LinkedList<>(detectedBeacons);
-        allBeaconsAndNearables.addAll(detectedNearables);
-        return allBeaconsAndNearables;
-    }
-
-    /**
-     * Find closest nearable or beacon based on signal strength
-     *
-     * @param
-     */
-    public Beacon getClosestNearableOrBeacon() {
-
-        Beacon closestNearableOrBeacon = null;
-
-        if (!this.getDetectedNearablesAndBeacons().isEmpty()) {
-            closestNearableOrBeacon = this.getDetectedNearablesAndBeacons().getFirst();
-        }
-        for (Beacon beaconOrNearable : this.getDetectedNearablesAndBeacons()) {
-            if (beaconOrNearable.getRssi() > closestNearableOrBeacon.getRssi()) {
-                closestNearableOrBeacon = beaconOrNearable;
-            }
-        }
-
-        return closestNearableOrBeacon;
-    }
-
-    /**
-     * Updates location based on most accurate location info available
-     */
-    public void updateLocation() {
-
-        Beacon closestBeaconOrNearable = getClosestNearableOrBeacon();
-
-        Log.d(TAG, "Updating location");
-        Log.d(TAG, "Pinpointed coordinates: " + pinpointedCoordinates + " building: " +
-                pinpointedBuildingName + " floor: " + pinpointedFloor);
-        if (closestBeaconOrNearable != null) {
-            Log.d(TAG, "Closest beacon: " + closestBeaconOrNearable.getName());
-        } else {
-            Log.d(TAG, "Closest beacon: null");
-        }
-        Log.d(TAG, "MSI building: " + MSIBuildingName + " floor: " + MSIFloor);
-
-        // json object with location
-        JSONObject jsonObject = new JSONObject();
-
-        // add the most accurate location available to json object
-        if (pinpointedCoordinates != null && pinpointedBuildingName != null && pinpointedFloor !=
-                null) {
-            try {
-                jsonObject.put("userLon", pinpointedCoordinates.longitude);
-                jsonObject.put("userLat", pinpointedCoordinates.latitude);
-                jsonObject.put("userBuilding", pinpointedBuildingName);
-                jsonObject.put("userFloor", pinpointedFloor);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (closestBeaconOrNearable != null) {
-            try {
-                jsonObject.put("userMajor", closestBeaconOrNearable.getMajor());
-                jsonObject.put("userMinor", closestBeaconOrNearable.getMinor());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (getMSIBuildingName() != null && getMSIFloor() != null) {
-            try {
-                jsonObject.put("userBuilding", getMSIBuildingName());
-                jsonObject.put("userFloor", getMSIFloor());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        // define url
-        String url = PropertiesSingleton.getInstance().getBackendServerUrl() +
-                "/users/me/location/";
-
-        // Request a string response from the provided URL.
-        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Location shared. Response is: " + response);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Location sharing: That didn't work!" + error.toString());
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                HashMap<String, String> params = new HashMap<String, String>();
-                params.put("Cookie", "connect.sid=" + AuthUtils.token);
-
-                return params;
-            }
-        };
-
-        VolleyQueueSingleton.getInstance(IndoorNavigation.getContext()).addToRequestQueue(putRequest);
-
-    }
-
-
-    public String getPinpointedFloor() {
-        return pinpointedFloor;
-    }
-
-    public void setPinpointedFloor(String pinpointedFloor) {
-        this.pinpointedFloor = pinpointedFloor;
-    }
-
-    public String getPinpointedBuildingName() {
-        return pinpointedBuildingName;
-    }
-
-    public void setPinpointedBuildingName(String pinpointedBuildingName) {
-        this.pinpointedBuildingName = pinpointedBuildingName;
-    }
-
 }

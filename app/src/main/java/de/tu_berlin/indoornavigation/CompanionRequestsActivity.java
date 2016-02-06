@@ -34,6 +34,11 @@ public class CompanionRequestsActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_companion_requests);
     }
 
+    /**
+     * Open dialog for accepting companion requests.
+     *
+     * @param companionRequest
+     */
     public void onListFragmentInteraction(final CompanionRequest companionRequest) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

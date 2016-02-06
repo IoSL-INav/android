@@ -21,9 +21,7 @@ import de.tu_berlin.indoornavigation.singletons.UsersGroupsDataSingleton;
  */
 public class CompanionRequestFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -34,8 +32,6 @@ public class CompanionRequestFragment extends Fragment {
     public CompanionRequestFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static CompanionRequestFragment newInstance(int columnCount) {
         CompanionRequestFragment fragment = new CompanionRequestFragment();
         Bundle args = new Bundle();
@@ -102,7 +98,6 @@ public class CompanionRequestFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(CompanionRequest companionRequest);
     }
 }
