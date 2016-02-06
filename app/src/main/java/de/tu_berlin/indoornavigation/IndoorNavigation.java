@@ -1,6 +1,7 @@
 package de.tu_berlin.indoornavigation;
 
 import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
@@ -56,63 +57,65 @@ public class IndoorNavigation extends Application {
 
         Log.d(TAG, "Application started.");
 
-        // initialise beacon manager
-        beaconManager = new BeaconManager(getApplicationContext());
-        beaconManager.setForegroundScanPeriod(5000, 5000); // TODO: set appropriate time
-        beaconManager.setNearableListener(new BeaconManager.NearableListener() {
-            @Override
-            public void onNearablesDiscovered(List<Nearable> list) {
-                Log.d(TAG, "onNearablesDiscovered listener");
+        // if bluetooth adapter is available run beacon scanning
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
+            // initialise beacon manager
+            beaconManager = new BeaconManager(getApplicationContext());
+            beaconManager.setForegroundScanPeriod(5000, 5000); // TODO: set appropriate time
+            beaconManager.setNearableListener(new BeaconManager.NearableListener() {
+                @Override
+                public void onNearablesDiscovered(List<Nearable> list) {
+                    Log.d(TAG, "onNearablesDiscovered listener");
 
-                // clear detected nearables
-                LocationSharingSingleton.getInstance().getDetectedNearables().clear();
+                    // clear detected nearables
+                    LocationSharingSingleton.getInstance().getDetectedNearables().clear();
 
-                // add newly detected nearables
-                for (Nearable nearable : list) {
-                    Log.d(TAG, nearable.toString());
+                    // add newly detected nearables
+                    for (Nearable nearable : list) {
+                        Log.d(TAG, nearable.toString());
 
-                    LocationSharingSingleton.getInstance().addDetectedNearable(new Beacon
-                            (nearable.region.getProximityUUID().toString(), nearable.region.getMajor(),
-                                    nearable.region.getMinor(), nearable.rssi));
+                        LocationSharingSingleton.getInstance().addDetectedNearable(new Beacon
+                                (nearable.region.getProximityUUID().toString(), nearable.region.getMajor(),
+                                        nearable.region.getMinor(), nearable.rssi));
+                    }
                 }
-            }
-        });
+            });
 
-        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
-            @Override
-            public void onBeaconsDiscovered(Region region, final List beacons) {
-                Log.d(TAG, "onBeaconsDiscovered listener");
-                Log.d(TAG, "Ranged beacons: " + beacons);
+            beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+                @Override
+                public void onBeaconsDiscovered(Region region, final List beacons) {
+                    Log.d(TAG, "onBeaconsDiscovered listener");
+                    Log.d(TAG, "Ranged beacons: " + beacons);
 
-                LinkedList<com.estimote.sdk.Beacon> beaconss = new LinkedList<>(beacons);
+                    LinkedList<com.estimote.sdk.Beacon> beaconss = new LinkedList<>(beacons);
 
-                // clear detected beacons
-                LocationSharingSingleton.getInstance().getDetectedBeacons().clear();
+                    // clear detected beacons
+                    LocationSharingSingleton.getInstance().getDetectedBeacons().clear();
 
 
-                for (com.estimote.sdk.Beacon beacon : beaconss) {
-                    Log.d(TAG, beacon.toString());
+                    for (com.estimote.sdk.Beacon beacon : beaconss) {
+                        Log.d(TAG, beacon.toString());
 
-                    LocationSharingSingleton.getInstance().addDetectedBeacon(new Beacon
-                            (beacon.getProximityUUID().toString(), beacon.getMajor(), beacon.getMinor
-                                    (), beacon.getRssi()));
+                        LocationSharingSingleton.getInstance().addDetectedBeacon(new Beacon
+                                (beacon.getProximityUUID().toString(), beacon.getMajor(), beacon.getMinor
+                                        (), beacon.getRssi()));
 
+                    }
                 }
-            }
-        });
+            });
 
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override
-            public void onServiceReady() {
+            beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+                @Override
+                public void onServiceReady() {
 
-                // Beacons ranging.
-                beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
+                    // Beacons ranging.
+                    beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
 
-                // Nearable discovery.
-                beaconManager.startNearableDiscovery();
-            }
-        });
-
+                    // Nearable discovery.
+                    beaconManager.startNearableDiscovery();
+                }
+            });
+        }
 
         // create service to monitor MSI API
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
